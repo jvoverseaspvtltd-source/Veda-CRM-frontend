@@ -74,24 +74,13 @@ import {
     View, 
     StyleSheet, 
     PDFDownloadLink, 
-    Image, 
-    Font 
+    Image 
 } from '@react-pdf/renderer';
 
-// Register a clean font for PDF
-Font.register({
-    family: 'Inter',
-    fonts: [
-        { src: 'https://fonts.gstatic.com/s/inter/v12/UcCOjAkZ986L5GVpUlSdyLxBQYZ-ZA.ttf', fontWeight: 400 },
-        { src: 'https://fonts.gstatic.com/s/inter/v12/UcC7jAkZ986L5GVpMYRSWpLO6vmDdBvFAmNJ1A.ttf', fontWeight: 600 },
-        { src: 'https://fonts.gstatic.com/s/inter/v12/UcC7jAkZ986L5GVpMYRSWpLO6vmDdBvFAmNJ1A.ttf', fontWeight: 700 }, // Bold
-        { src: 'https://fonts.gstatic.com/s/inter/v12/UcC7jAkZ986L5GVpjt8SdyLxBQYZ-ZA.ttf', fontWeight: 900 }
-    ]
-});
-
 // ─── PDF Document Component (Premium Finance Style) ─────────────────────────
+// Using built-in Helvetica font for maximum compatibility
 const PDFStyles = StyleSheet.create({
-    page: { padding: 40, fontFamily: 'Inter', backgroundColor: '#ffffff' },
+    page: { padding: 40, fontFamily: 'Helvetica', backgroundColor: '#ffffff' },
     header: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
@@ -101,16 +90,16 @@ const PDFStyles = StyleSheet.create({
         paddingBottom: 20 
     },
     logoSection: { flexDirection: 'column' },
-    logoLabel: { fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: -1 },
-    headerSubtitle: { fontSize: 10, color: '#64748b', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.5 },
+    logoLabel: { fontSize: 26, fontWeight: 'bold', color: '#0f172a' },
+    headerSubtitle: { fontSize: 9, color: '#64748b', marginTop: 3, textTransform: 'uppercase', letterSpacing: 1 },
     badge: { 
         backgroundColor: '#f0fdf4', 
-        paddingHorizontal: 12, 
-        paddingVertical: 6, 
-        borderRadius: 6, 
+        paddingHorizontal: 10, 
+        paddingVertical: 4, 
+        borderRadius: 4, 
         border: '1px solid #dcfce7' 
     },
-    badgeText: { fontSize: 9, color: '#166534', fontWeight: 700, letterSpacing: 0.5 },
+    badgeText: { fontSize: 8, color: '#166534', fontWeight: 'bold' },
 
     divider: { 
         height: 4, 
@@ -119,7 +108,7 @@ const PDFStyles = StyleSheet.create({
     },
 
     titleSection: { marginBottom: 30 },
-    mainTitle: { fontSize: 22, fontWeight: 700, color: '#0f172a', marginBottom: 8 },
+    mainTitle: { fontSize: 22, fontWeight: 'bold', color: '#0f172a', marginBottom: 8 },
     subTitle: { fontSize: 11, color: '#64748b' },
     docId: { fontSize: 9, color: '#94a3b8', marginTop: 4 },
 
@@ -131,14 +120,14 @@ const PDFStyles = StyleSheet.create({
         borderBottom: '1px solid #e2e8f0',
         paddingBottom: 8
     },
-    sectionLabel: { fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: 1 },
+    sectionLabel: { fontSize: 11, fontWeight: 'bold', color: '#2563eb', textTransform: 'uppercase', letterSpacing: 1 },
     sectionIcon: { marginRight: 8 },
     
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
     fieldBox: { width: '47%', marginBottom: 15 },
     fieldLabel: { fontSize: 8, color: '#94a3b8', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 },
-    fieldValue: { fontSize: 11, color: '#1e293b', fontWeight: 600 },
-    fieldValueLarge: { fontSize: 13, color: '#0f172a', fontWeight: 700 },
+    fieldValue: { fontSize: 11, color: '#1e293b', fontWeight: 'bold' },
+    fieldValueLarge: { fontSize: 13, color: '#0f172a', fontWeight: 'bold' },
 
     credentialCard: { 
         backgroundColor: '#f8fafc', 
@@ -164,7 +153,7 @@ const PDFStyles = StyleSheet.create({
         borderRadius: 8
     },
     passwordLabel: { fontSize: 9, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
-    passwordText: { fontSize: 18, fontWeight: 700, color: '#dc2626', letterSpacing: 3 },
+    passwordText: { fontSize: 18, fontWeight: 'bold', color: '#dc2626', letterSpacing: 3 },
 
     accessCard: {
         backgroundColor: '#eff6ff',
@@ -174,8 +163,8 @@ const PDFStyles = StyleSheet.create({
         border: '1px solid #bfdbfe'
     },
     accessRow: { flexDirection: 'row', marginBottom: 8, alignItems: 'center' },
-    accessLabel: { fontSize: 9, color: '#1e40af', fontWeight: 600, width: 100 },
-    accessValue: { fontSize: 10, color: '#1e293b', fontWeight: 700, flex: 1 },
+    accessLabel: { fontSize: 9, color: '#1e40af', fontWeight: 'bold', width: 100 },
+    accessValue: { fontSize: 10, color: '#1e293b', fontWeight: 'bold', flex: 1 },
 
     supportCard: {
         backgroundColor: '#fefce8',
@@ -184,10 +173,10 @@ const PDFStyles = StyleSheet.create({
         marginTop: 15,
         border: '1px solid #fef08a'
     },
-    supportTitle: { fontSize: 10, fontWeight: 700, color: '#854d0e', marginBottom: 10 },
+    supportTitle: { fontSize: 10, fontWeight: 'bold', color: '#854d0e', marginBottom: 10 },
     supportRow: { flexDirection: 'row', marginBottom: 6, alignItems: 'center' },
     supportLabel: { fontSize: 9, color: '#92400e', width: 120 },
-    supportValue: { fontSize: 10, color: '#713f12', fontWeight: 600 },
+    supportValue: { fontSize: 10, color: '#713f12', fontWeight: 'bold' },
 
     noteBox: { 
         backgroundColor: '#fef3c7', 
@@ -206,7 +195,7 @@ const PDFStyles = StyleSheet.create({
         marginTop: 15,
         border: '1px solid #bbf7d0'
     },
-    nextStepsTitle: { fontSize: 10, fontWeight: 700, color: '#166534', marginBottom: 8 },
+    nextStepsTitle: { fontSize: 10, fontWeight: 'bold', color: '#166534', marginBottom: 8 },
     stepRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'flex-start' },
     stepNumber: { 
         width: 18, 
@@ -215,7 +204,7 @@ const PDFStyles = StyleSheet.create({
         backgroundColor: '#10b981', 
         color: '#fff', 
         fontSize: 9, 
-        fontWeight: 700,
+        fontWeight: 'bold',
         textAlign: 'center',
         lineHeight: 18,
         marginRight: 8
@@ -236,7 +225,7 @@ const PDFStyles = StyleSheet.create({
     footerLeft: { flexDirection: 'column' },
     footerRight: { alignItems: 'flex-end' },
     footerText: { fontSize: 8, color: '#94a3b8', marginBottom: 2 },
-    footerConfidential: { fontSize: 9, color: '#dc2626', fontWeight: 700 }
+    footerConfidential: { fontSize: 9, color: '#dc2626', fontWeight: 'bold' }
 });
 
 const CredentialsPDF = ({ creds, createdBy }) => (
