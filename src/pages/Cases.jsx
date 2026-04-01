@@ -193,7 +193,7 @@ const Cases = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, flexWrap: 'wrap', gap: 2 }}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.main', letterSpacing: -1 }}>
-                        Stage Tracker
+                        Pipeline Tracker
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
                         Monitor and track all active applications through their lifecycle

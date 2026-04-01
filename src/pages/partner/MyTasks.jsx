@@ -1,245 +1,497 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Box, Typography, Card, Grid, Chip, Button, Avatar, 
-    useTheme, alpha, CircularProgress, IconButton, Tooltip,
-    TextField, InputAdornment, LinearProgress
+import {
+    Box, Typography, Paper, Table, TableBody, TableCell,
+    TableContainer, TableHead, TableRow, Button, IconButton,
+    Chip, CircularProgress, Stack, Alert, Tooltip, alpha,
+    useTheme, Tabs, Tab, TextField, Snackbar, Avatar,
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    MenuItem, Divider, Card, CardContent, Grid
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    ClipboardList, Clock, CheckCircle2, AlertCircle, 
-    Search, Filter, ChevronRight, Calendar, 
-    MessageSquare, ArrowUpRight, Sparkles
+import {
+    Search, Eye, RefreshCw, CheckCircle2, Clock, X,
+    AlertCircle, FileText, Building2, Phone, Mail,
+    DollarSign, Calendar, Share2, User, MapPin
 } from 'lucide-react';
+import { usePartnerAuth } from '../../context/PartnerAuthContext';
+import { applicationService } from '../../services/api';
+
+const STATUS_COLORS = {
+    'New Application': { bg: '#e0f2fe', color: '#0369a1' },
+    'Under Review': { bg: '#fef3c7', color: '#b45309' },
+    'Documents Pending': { bg: '#f3e8ff', color: '#7c3aed' },
+    'Submitted to Bank': { bg: '#dbeafe', color: '#1d4ed8' },
+    'Under Process': { bg: '#fef3c7', color: '#b45309' },
+    'Approved': { bg: '#dcfce7', color: '#15803d' },
+    'Rejected': { bg: '#fee2e2', color: '#dc2626' },
+    'Disbursed': { bg: '#dcfce7', color: '#15803d' },
+};
 
 const MyTasks = () => {
     const theme = useTheme();
+    const { partner } = usePartnerAuth();
+
+    const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
-    
-    // Mock data for the Credit Partner tasks
-    const [tasks, setTasks] = useState([
-        { 
-            id: 1, 
-            title: 'Verify KYC Documents - Rajesh Kumar', 
-            priority: 'High', 
-            status: 'Pending', 
-            dueDate: '2026-04-05', 
-            category: 'Verification',
-            description: 'Double check the PAN and Aadhar card details provided for the personal loan application.'
-        },
-        { 
-            id: 2, 
-            title: 'Update Commission Structure', 
-            priority: 'Medium', 
-            status: 'In Progress', 
-            dueDate: '2026-04-10', 
-            category: 'Admin',
-            description: 'Review and sign the new commission agreement for Q2 2026.'
-        },
-        { 
-            id: 3, 
-            title: 'Respond to Query: Case #8842', 
-            priority: 'High', 
-            status: 'Pending', 
-            dueDate: '2026-04-03', 
-            category: 'Support',
-            description: 'The employee needs clarification on the income proof provided for the SME loan.'
-        },
-        { 
-            id: 4, 
-            title: 'Complete Training Module', 
-            priority: 'Low', 
-            status: 'Completed', 
-            dueDate: '2026-03-28', 
-            category: 'Training',
-            description: 'New standard operating procedures for digital disbursement.'
-        }
-    ]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState(0);
+    const [error, setError] = useState(null);
+
+    // View Details Dialog
+    const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
+
+    // Update Status Dialog
+    const [openStatusDialog, setOpenStatusDialog] = useState(false);
+    const [newStatus, setNewStatus] = useState('');
+    const [statusNotes, setStatusNotes] = useState('');
+    const [updating, setUpdating] = useState(false);
+
+    // Snackbar
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', type: 'success' });
 
     useEffect(() => {
-        // Simulate loading
-        const timer = setTimeout(() => setLoading(false), 800);
-        return () => clearTimeout(timer);
+        fetchTasks();
     }, []);
 
-    const getPriorityColor = (priority) => {
-        switch (priority) {
-            case 'High': return '#ef4444';
-            case 'Medium': return '#f59e0b';
-            case 'Low': return '#10b981';
-            default: return theme.palette.primary.main;
+    const fetchTasks = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await applicationService.getSharedApplications();
+            setTasks(data || []);
+        } catch (err) {
+            console.error('Failed to fetch tasks', err);
+            setError('Failed to load shared applications. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case 'Completed': return <CheckCircle2 size={18} />;
-            case 'In Progress': return <Clock size={18} />;
-            case 'Pending': return <AlertCircle size={18} />;
-            default: return <ClipboardList size={18} />;
+    const showSnackbar = (message, type = 'success') => {
+        setSnackbar({ open: true, message, type });
+    };
+
+    const filteredTasks = tasks.filter(t => {
+        const matchesSearch =
+            t.applicant_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            t.uid?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            t.phone?.includes(searchTerm);
+        return matchesSearch;
+    });
+
+    const getFilteredTasks = () => {
+        const statusTabs = ['All', 'New Application', 'Under Process', 'Approved', 'Rejected'];
+        if (activeTab === 0) return filteredTasks;
+
+        const status = statusTabs[activeTab];
+        return filteredTasks.filter(t => t.status === status);
+    };
+
+    const getStatusStyle = (status) => {
+        const style = STATUS_COLORS[status] || { bg: '#f1f5f9', color: '#64748b' };
+        return {
+            bgcolor: style.bg,
+            color: style.color,
+            fontWeight: 700,
+            fontSize: '0.7rem',
+            textTransform: 'uppercase'
+        };
+    };
+
+    const handleOpenDetails = (task) => {
+        setSelectedTask(task);
+        setOpenDetailsDialog(true);
+    };
+
+    const handleOpenStatusDialog = (task) => {
+        setSelectedTask(task);
+        setNewStatus(task.status);
+        setStatusNotes('');
+        setOpenStatusDialog(true);
+        setOpenDetailsDialog(false);
+    };
+
+    const handleUpdateStatus = async () => {
+        if (!newStatus || !selectedTask) return;
+
+        setUpdating(true);
+        try {
+            await applicationService.update(selectedTask.id, {
+                status: newStatus,
+                partner_notes: statusNotes
+            });
+            showSnackbar('Status updated successfully!');
+            setOpenStatusDialog(false);
+            fetchTasks();
+        } catch (err) {
+            showSnackbar('Failed to update status', 'error');
+        } finally {
+            setUpdating(false);
         }
+    };
+
+    const stats = {
+        total: tasks.length,
+        new: tasks.filter(t => t.status === 'New Application').length,
+        processing: tasks.filter(t => ['Under Review', 'Submitted to Bank', 'Under Process'].includes(t.status)).length,
+        approved: tasks.filter(t => ['Approved', 'Disbursed'].includes(t.status)).length,
+        rejected: tasks.filter(t => t.status === 'Rejected').length
     };
 
     if (loading) {
         return (
             <Box sx={{ height: '70vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
                 <CircularProgress size={40} thickness={4} />
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, letterSpacing: 1 }}>LOADING TASKS...</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, letterSpacing: 1 }}>
+                    LOADING YOUR TASKS...
+                </Typography>
             </Box>
         );
     }
 
     return (
-        <Box sx={{ pb: 6 }}>
-            {/* Header Area */}
-            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+        <Box>
+            {/* Header */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+                <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                        <Box sx={{ p: 1.2, borderRadius: 2.5, bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}>
-                            <ClipboardList size={24} />
+                        <Box sx={{ p: 1.5, bgcolor: alpha(theme.palette.primary.main, 0.1), borderRadius: 2, color: 'primary.main' }}>
+                            <Share2 size={24} />
                         </Box>
-                        <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: -0.5 }}>My Tasks</Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.main', letterSpacing: -1 }}>
+                            My Tasks
+                        </Typography>
                     </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        Manage your operational actions and pending requirements here.
+                    <Typography variant="body1" color="text.secondary">
+                        Applications shared with you for processing
                     </Typography>
-                </motion.div>
-                
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                        size="small"
-                        placeholder="Search tasks..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        sx={{ bgcolor: 'background.paper', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Search size={18} />
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
-                    <Button variant="contained" startIcon={<Sparkles size={18} />} sx={{ borderRadius: 2, fontWeight: 700, px: 3 }}>
-                        AI Prioritize
-                    </Button>
                 </Box>
+                <Button
+                    variant="outlined"
+                    startIcon={<RefreshCw size={18} />}
+                    onClick={fetchTasks}
+                    sx={{ borderRadius: 3, fontWeight: 700 }}
+                >
+                    Refresh
+                </Button>
             </Box>
 
-            {/* Quick Stats */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
-                        <Box sx={{ position: 'relative', zIndex: 1 }}>
-                            <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Efficiency Rate</Typography>
-                            <Typography variant="h4" sx={{ fontWeight: 900, mt: 0.5, mb: 1 }}>84%</Typography>
-                            <LinearProgress variant="determinate" value={84} sx={{ height: 6, borderRadius: 3, bgcolor: alpha(theme.palette.success.main, 0.1), '& .MuiLinearProgress-bar': { bgcolor: 'success.main' } }} />
+            {/* Error Alert */}
+            {error && (
+                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }} onClose={() => setError(null)}>
+                    {error}
+                </Alert>
+            )}
+
+            {/* Stats Cards */}
+            <Grid container spacing={2} sx={{ mb: 4 }}>
+                {[
+                    { label: 'Total Tasks', value: stats.total, icon: <FileText size={20} />, color: '#6366f1' },
+                    { label: 'New', value: stats.new, icon: <User size={20} />, color: '#0ea5e9' },
+                    { label: 'In Process', value: stats.processing, icon: <Clock size={20} />, color: '#f59e0b' },
+                    { label: 'Approved', value: stats.approved, icon: <CheckCircle2 size={20} />, color: '#10b981' },
+                    { label: 'Rejected', value: stats.rejected, icon: <X size={20} />, color: '#ef4444' },
+                ].map((stat) => (
+                    <Grid item xs={6} sm={4} md={2.4} key={stat.label}>
+                        <Paper sx={{ p: 2, borderRadius: 3, textAlign: 'center', border: '1px solid', borderColor: alpha(stat.color, 0.1) }}>
+                            <Box sx={{ color: stat.color, mb: 1 }}>{stat.icon}</Box>
+                            <Typography variant="h4" sx={{ fontWeight: 900, color: stat.color }}>{stat.value}</Typography>
+                            <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                        </Paper>
+                    </Grid>
+                ))}
+            </Grid>
+
+            {/* Tabs & Search */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                <Tabs
+                    value={activeTab}
+                    onChange={(_, v) => setActiveTab(v)}
+                    sx={{
+                        bgcolor: alpha(theme.palette.divider, 0.06),
+                        borderRadius: 2.5,
+                        minHeight: 40,
+                        '& .MuiTab-root': { minHeight: 40, py: 0.5, fontWeight: 700, fontSize: '0.8rem' },
+                        '& .Mui-selected': { color: 'primary.main' }
+                    }}
+                >
+                    <Tab label={`All (${stats.total})`} />
+                    <Tab label={`New (${stats.new})`} />
+                    <Tab label={`Processing (${stats.processing})`} />
+                    <Tab label={`Approved (${stats.approved})`} />
+                    <Tab label={`Rejected (${stats.rejected})`} />
+                </Tabs>
+
+                <TextField
+                    size="small"
+                    placeholder="Search by name, UID, or phone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ minWidth: 280, bgcolor: 'background.paper', borderRadius: 2 }}
+                    InputProps={{
+                        startAdornment: <Search size={18} style={{ marginRight: 8, color: theme.palette.text.secondary }} />
+                    }}
+                />
+            </Box>
+
+            {/* Tasks Table */}
+            <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 'none', border: '1px solid', borderColor: 'divider' }}>
+                <Table>
+                    <TableHead>
+                        <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.03) }}>
+                            <TableCell sx={{ fontWeight: 800 }}>Student</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>UID</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Contact</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Amount</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Shared On</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {getFilteredTasks().length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={7} sx={{ textAlign: 'center', py: 6 }}>
+                                    <Box sx={{ color: 'text.secondary' }}>
+                                        <FileText size={48} style={{ opacity: 0.3, marginBottom: 8 }} />
+                                        <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                            No tasks found
+                                        </Typography>
+                                        <Typography variant="caption">
+                                            Applications shared with you will appear here
+                                        </Typography>
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            getFilteredTasks().map((t) => (
+                                <TableRow key={t.id} hover>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 800, fontSize: '0.9rem', width: 36, height: 36 }}>
+                                                {t.applicant_name?.charAt(0) || 'A'}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t.applicant_name}</Typography>
+                                                <Typography variant="caption" color="text.secondary">{t.email}</Typography>
+                                            </Box>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: 'monospace' }}>
+                                            {t.uid || 'N/A'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <Phone size={12} /> {t.phone}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'success.main' }}>
+                                            ₹{t.loan_amount?.toLocaleString() || '0'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip label={t.status} size="small" {...getStatusStyle(t.status)} />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                            {t.shared_at ? new Date(t.shared_at).toLocaleDateString('en-IN') : 'N/A'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Stack direction="row" spacing={0.5}>
+                                            <Tooltip title="View Details">
+                                                <IconButton size="small" color="primary" onClick={() => handleOpenDetails(t)}>
+                                                    <Eye size={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Update Status">
+                                                <IconButton size="small" sx={{ bgcolor: alpha('#10b981', 0.1), color: '#10b981' }} onClick={() => handleOpenStatusDialog(t)}>
+                                                    <CheckCircle2 size={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Stack>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* View Details Dialog */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            <Dialog open={openDetailsDialog} onClose={() => setOpenDetailsDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ p: 3, pb: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ p: 1.5, bgcolor: alpha(theme.palette.primary.main, 0.1), borderRadius: 2, color: 'primary.main' }}>
+                                <Eye size={24} />
+                            </Box>
+                            <Box>
+                                <Typography variant="h5" sx={{ fontWeight: 800 }}>Application Details</Typography>
+                                <Typography variant="caption" color="text.secondary">{selectedTask?.uid}</Typography>
+                            </Box>
                         </Box>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Pending High Priority</Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 900, mt: 0.5, color: '#ef4444' }}>2</Typography>
-                        <Typography variant="caption" color="text.secondary">Requires immediate attention</Typography>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>Next Deadline</Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 900, mt: 0.5 }}>Tommorrow</Typography>
-                        <Typography variant="caption" color="text.secondary">Responding to Case #8842</Typography>
-                    </Card>
-                </Grid>
-            </Grid>
+                        <IconButton onClick={() => setOpenDetailsDialog(false)}><X size={20} /></IconButton>
+                    </Box>
+                </DialogTitle>
 
-            {/* Tasks List */}
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                Action Items <Chip label={tasks.length} size="small" sx={{ fontWeight: 900, height: 20 }} />
-            </Typography>
+                <DialogContent sx={{ p: 3 }}>
+                    {selectedTask && (
+                        <Stack spacing={2}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
+                                <Avatar sx={{ width: 50, height: 50, bgcolor: 'primary.main', fontSize: '1.2rem', fontWeight: 800 }}>
+                                    {selectedTask.applicant_name?.charAt(0)}
+                                </Avatar>
+                                <Box>
+                                    <Typography variant="h6" sx={{ fontWeight: 800 }}>{selectedTask.applicant_name}</Typography>
+                                    <Chip label={selectedTask.status} size="small" {...getStatusStyle(selectedTask.status)} />
+                                </Box>
+                            </Box>
 
-            <Grid container spacing={2}>
-                <AnimatePresence>
-                    {tasks.map((task, index) => (
-                        <Grid item xs={12} key={task.id}>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <Card sx={{ 
-                                    p: 2.5, 
-                                    borderRadius: 3.5, 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 3,
-                                    transition: 'all 0.2s',
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    '&:hover': { 
-                                        borderColor: theme.palette.primary.main,
-                                        boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
-                                        transform: 'translateY(-2px)'
-                                    }
-                                }}>
-                                    <Box sx={{ 
-                                        width: 50, height: 50, borderRadius: '50%', 
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        bgcolor: alpha(getPriorityColor(task.priority), 0.1),
-                                        color: getPriorityColor(task.priority)
-                                    }}>
-                                        {getStatusIcon(task.status)}
-                                    </Box>
-                                    
-                                    <Box sx={{ flex: 1 }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{task.title}</Typography>
-                                            <Chip 
-                                                label={task.priority} 
-                                                size="small" 
-                                                sx={{ 
-                                                    height: 18, 
-                                                    fontSize: '0.65rem', 
-                                                    fontWeight: 900, 
-                                                    bgcolor: alpha(getPriorityColor(task.priority), 0.1),
-                                                    color: getPriorityColor(task.priority),
-                                                    border: '1px solid',
-                                                    borderColor: alpha(getPriorityColor(task.priority), 0.2)
-                                                }} 
-                                            />
-                                        </Box>
-                                        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 600 }}>{task.description}</Typography>
-                                        
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mt: 1.5 }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                                                <Calendar size={14} color={theme.palette.text.secondary} />
-                                                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{task.dueDate}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                                                <Typography variant="caption" sx={{ px: 1, py: 0.3, borderRadius: 1, bgcolor: 'action.hover', color: 'text.secondary', fontWeight: 700 }}>{task.category}</Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                                                <MessageSquare size={14} color={theme.palette.text.secondary} />
-                                                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>2 notes</Typography>
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                    
-                                    <Box>
-                                        <Button 
-                                            variant="outlined" 
-                                            endIcon={<ChevronRight size={16} />}
-                                            sx={{ borderRadius: 2, fontWeight: 700, borderColor: 'divider' }}
-                                        >
-                                            Resolve
-                                        </Button>
-                                    </Box>
-                                </Card>
-                            </motion.div>
-                        </Grid>
-                    ))}
-                </AnimatePresence>
-            </Grid>
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <Typography variant="caption" color="text.secondary">Contact</Typography>
+                                    <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Phone size={14} /> {selectedTask.phone}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="caption" color="text.secondary">Email</Typography>
+                                    <Typography variant="body2" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        <Mail size={14} /> {selectedTask.email}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="caption" color="text.secondary">Loan Amount</Typography>
+                                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'success.main' }}>
+                                        ₹{selectedTask.loan_amount?.toLocaleString() || '0'}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography variant="caption" color="text.secondary">Location</Typography>
+                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                        {selectedTask.city || 'N/A'}, {selectedTask.state || ''}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+
+                            {selectedTask.notes && (
+                                <Box sx={{ p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
+                                    <Typography variant="caption" color="text.secondary">Notes</Typography>
+                                    <Typography variant="body2">{selectedTask.notes}</Typography>
+                                </Box>
+                            )}
+
+                            <Box sx={{ p: 2, bgcolor: alpha(theme.palette.info.main, 0.05), borderRadius: 2, border: '1px solid', borderColor: alpha(theme.palette.info.main, 0.1) }}>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: 'info.main' }}>
+                                    Shared by: {selectedTask.shared_by_name || 'Veda Team'}
+                                </Typography>
+                                <Typography variant="caption" display="block" color="text.secondary">
+                                    {selectedTask.shared_at ? new Date(selectedTask.shared_at).toLocaleString() : 'N/A'}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                    )}
+                </DialogContent>
+
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button onClick={() => setOpenDetailsDialog(false)} sx={{ fontWeight: 700 }}>
+                        Close
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        onClick={() => handleOpenStatusDialog(selectedTask)}
+                        startIcon={<CheckCircle2 size={18} />}
+                        sx={{ fontWeight: 700 }}
+                    >
+                        Update Status
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* Update Status Dialog */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            <Dialog open={openStatusDialog} onClose={() => !updating && setOpenStatusDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ p: 3, pb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ p: 1.5, bgcolor: alpha('#10b981', 0.1), borderRadius: 2, color: '#10b981' }}>
+                            <CheckCircle2 size={24} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ fontWeight: 800 }}>Update Status</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Update application status for {selectedTask?.applicant_name}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </DialogTitle>
+
+                <DialogContent sx={{ p: 3 }}>
+                    <TextField
+                        select
+                        label="New Status"
+                        fullWidth
+                        value={newStatus}
+                        onChange={(e) => setNewStatus(e.target.value)}
+                        sx={{ mb: 2 }}
+                    >
+                        <MenuItem value="New Application">New Application</MenuItem>
+                        <MenuItem value="Under Review">Under Review</MenuItem>
+                        <MenuItem value="Documents Pending">Documents Pending</MenuItem>
+                        <MenuItem value="Submitted to Bank">Submitted to Bank</MenuItem>
+                        <MenuItem value="Under Process">Under Process</MenuItem>
+                        <MenuItem value="Approved">Approved</MenuItem>
+                        <MenuItem value="Rejected">Rejected</MenuItem>
+                        <MenuItem value="Disbursed">Disbursed</MenuItem>
+                    </TextField>
+
+                    <TextField
+                        label="Notes (Optional)"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={statusNotes}
+                        onChange={(e) => setStatusNotes(e.target.value)}
+                        placeholder="Add any notes about this status update..."
+                        InputProps={{ sx: { borderRadius: 2 } }}
+                    />
+                </DialogContent>
+
+                <DialogActions sx={{ p: 3, pt: 1 }}>
+                    <Button onClick={() => setOpenStatusDialog(false)} disabled={updating} sx={{ fontWeight: 700 }}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="success"
+                        onClick={handleUpdateStatus}
+                        disabled={!newStatus || updating}
+                        startIcon={updating ? <CircularProgress size={18} color="inherit" /> : <CheckCircle2 size={18} />}
+                        sx={{ fontWeight: 800 }}
+                    >
+                        {updating ? 'Updating...' : 'Update Status'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
+                onClose={() => setSnackbar(p => ({ ...p, open: false }))}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert severity={snackbar.type} sx={{ borderRadius: 2, fontWeight: 700 }}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

@@ -176,15 +176,27 @@ const Applications = () => {
         setOpenAddModal(true);
     };
 
+    const MAX_ZIP_SIZE = 25 * 1024 * 1024; // 25 MB in bytes
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.type === 'application/zip' || file.name.endsWith('.zip')) {
-                setZipFile(file);
-                setFormError('');
-            } else {
+            // Validate file type
+            if (!file.name.endsWith('.zip') && file.type !== 'application/zip') {
                 setFormError('Please upload a ZIP file only');
+                setZipFile(null);
+                return;
             }
+            
+            // Validate file size (25 MB limit)
+            if (file.size > MAX_ZIP_SIZE) {
+                setFormError('File size should be less than 25 MB');
+                setZipFile(null);
+                return;
+            }
+            
+            setZipFile(file);
+            setFormError('');
         }
     };
 
@@ -230,29 +242,39 @@ const Applications = () => {
             };
 
             // Simulate upload progress
-            setUploadProgress(30);
+            setUploadProgress(20);
             const response = await applicationService.create(appData);
-            setUploadProgress(60);
+            setUploadProgress(40);
 
             // Upload ZIP if exists
             if (zipFile) {
+                setUploadProgress(60);
                 const formData = new FormData();
                 formData.append('file', zipFile);
                 formData.append('application_id', response.id);
                 formData.append('type', 'documents_zip');
+                formData.append('fileName', zipFile.name);
+                formData.append('fileSize', zipFile.size.toString());
                 
-                await applicationService.uploadDocument(formData);
+                try {
+                    setUploadProgress(80);
+                    await applicationService.uploadDocument(formData);
+                    setUploadProgress(100);
+                } catch (uploadErr) {
+                    console.error('ZIP upload failed:', uploadErr);
+                    // Show error but don't block - application was created successfully
+                    setFormError(uploadErr.response?.data?.error || 'Document upload failed, but application was registered. Please try uploading again from details page.');
+                    setSubmitting(false);
+                    setUploading(false);
+                    return;
+                }
+            } else {
+                setUploadProgress(100);
             }
-            setUploadProgress(100);
 
             showSnackbar('Application registered successfully!');
             setOpenAddModal(false);
             fetchApplications();
-
-            // Open share modal after successful creation
-            setSelectedApp(response);
-            fetchPartners();
-            setTimeout(() => setOpenShareModal(true), 500);
 
         } catch (err) {
             setFormError(err.response?.data?.error || 'Failed to create application');
@@ -487,7 +509,11 @@ const Applications = () => {
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip title="Share with Partner">
-                                                <IconButton size="small" sx={{ bgcolor: alpha('#10b981', 0.1), color: '#10b981' }} onClick={() => handleOpenShareModal(a)}>
+                                                <IconButton 
+                                                    size="small" 
+                                                    sx={{ bgcolor: alpha('#10b981', 0.1), color: '#10b981' }} 
+                                                    onClick={() => handleOpenShareModal(a)}
+                                                >
                                                     <Share2 size={18} />
                                                 </IconButton>
                                             </Tooltip>
@@ -646,8 +672,8 @@ const Applications = () => {
                                         <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'success.main' }}>
                                             {zipFile.name}
                                         </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {(zipFile.size / 1024 / 1024).toFixed(2)} MB
+                                        <Typography variant="caption" color={zipFile.size > 20 * 1024 * 1024 ? 'warning.main' : 'text.secondary'}>
+                                            {(zipFile.size / 1024 / 1024).toFixed(2)} MB / 25 MB max
                                         </Typography>
                                         <Button size="small" sx={{ ml: 2 }} onClick={(e) => { e.stopPropagation(); setZipFile(null); }}>
                                             Remove
@@ -659,7 +685,7 @@ const Applications = () => {
                                             Upload Documents ZIP (Optional)
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary">
-                                            Drag & drop or click to select a ZIP file containing all documents
+                                            Drag & drop or click to select a ZIP file (max 25 MB)
                                         </Typography>
                                     </Box>
                                 )}
@@ -710,41 +736,62 @@ const Applications = () => {
                         <Box>
                             <Typography variant="h5" sx={{ fontWeight: 800 }}>Share with Credit Partner</Typography>
                             <Typography variant="caption" color="text.secondary">
-                                Select a partner to share "{selectedApp?.applicant_name}" application
+                                Share "{selectedApp?.applicant_name}" with a partner for processing
                             </Typography>
                         </Box>
                     </Box>
                 </DialogTitle>
 
                 <DialogContent sx={{ p: 3 }}>
-                    <TextField
-                        select
-                        label="Select Credit Partner"
-                        fullWidth
-                        value={selectedPartner}
-                        onChange={(e) => setSelectedPartner(e.target.value)}
-                        sx={{ mb: 2 }}
-                    >
-                        <MenuItem value="" disabled>Choose a partner...</MenuItem>
-                        {partners.map(p => (
-                            <MenuItem key={p.id} value={p.id}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <Avatar sx={{ width: 32, height: 32, bgcolor: alpha('#6366f1', 0.1), color: '#6366f1', fontSize: '0.8rem' }}>
-                                        {p.name?.charAt(0)}
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{p.name}</Typography>
-                                        <Typography variant="caption" color="text.secondary">{p.bank_name} - {p.branch_name}</Typography>
-                                    </Box>
-                                </Box>
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                    {partners.length === 0 ? (
+                        <Box sx={{ textAlign: 'center', py: 3 }}>
+                            <CircularProgress size={24} />
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Loading partners...</Typography>
+                        </Box>
+                    ) : (
+                        <>
+                            <TextField
+                                select
+                                label="Select Credit Partner"
+                                fullWidth
+                                value={selectedPartner}
+                                onChange={(e) => setSelectedPartner(e.target.value)}
+                                sx={{ mb: 2 }}
+                            >
+                                <MenuItem value="" disabled>Choose a partner...</MenuItem>
+                                {partners.map(p => (
+                                    <MenuItem key={p.id} value={p.id}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Avatar sx={{ width: 32, height: 32, bgcolor: alpha('#6366f1', 0.1), color: '#6366f1', fontSize: '0.8rem' }}>
+                                                {p.name?.charAt(0)}
+                                            </Avatar>
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontWeight: 700 }}>{p.name}</Typography>
+                                                <Typography variant="caption" color="text.secondary">{p.bank_name} - {p.branch_name}</Typography>
+                                            </Box>
+                                        </Box>
+                                    </MenuItem>
+                                ))}
+                            </TextField>
 
-                    {selectedPartner && (
-                        <Alert severity="info" sx={{ borderRadius: 2 }}>
-                            The partner will receive this application in their <strong>"My Tasks"</strong> page and can view documents, update status, and communicate.
-                        </Alert>
+                            {selectedPartner && (
+                                <Alert severity="info" sx={{ borderRadius: 2 }}>
+                                    The partner will receive this application in their <strong>"My Tasks"</strong> page and can view documents, update status, and communicate.
+                                </Alert>
+                            )}
+
+                            {selectedApp && (
+                                <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Application Details:</Typography>
+                                    <Stack spacing={0.5}>
+                                        <Typography variant="caption"><strong>Student:</strong> {selectedApp.applicant_name}</Typography>
+                                        <Typography variant="caption"><strong>UID:</strong> {selectedApp.uid}</Typography>
+                                        <Typography variant="caption"><strong>Amount:</strong> ₹{selectedApp.loan_amount?.toLocaleString() || '0'}</Typography>
+                                        <Typography variant="caption"><strong>Status:</strong> {selectedApp.status}</Typography>
+                                    </Stack>
+                                </Box>
+                            )}
+                        </>
                     )}
                 </DialogContent>
 
