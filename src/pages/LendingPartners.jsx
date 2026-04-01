@@ -1,33 +1,3 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Typography,
-    Paper,
-    Chip,
-    IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    MenuItem,
-    Alert,
-    CircularProgress,
-    Tooltip,
-    Grid,
-    Stack,
-    Avatar,
-    alpha,
-    useTheme,
-    InputAdornment,
-    Divider,
-    Tab,
-    Tabs,
-    Table,
-    TableBody,
     TableCell,
     TableContainer,
     TableHead,
@@ -56,7 +26,147 @@ import {
     KeyRound,
     MapPin,
     UserCircle,
+    Download,
+    CheckCircle2,
+    Info,
+    Lock,
+    Shield,
+    Globe,
+    User
 } from 'lucide-react';
+import { lendingPartnerService, bankService } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { 
+    Document, 
+    Page, 
+    Text, 
+    View, 
+    StyleSheet, 
+    PDFDownloadLink, 
+    Image, 
+    Font 
+} from '@react-pdf/renderer';
+
+// Register a clean font for PDF
+Font.register({
+    family: 'Inter',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/inter/v12/UcCOjAkZ986L5GVpUlSdyLxBQYZ-ZA.ttf', fontWeight: 400 },
+        { src: 'https://fonts.gstatic.com/s/inter/v12/UcC7jAkZ986L5GVpMYRSWpLO6vmDdBvFAmNJ1A.ttf', fontWeight: 600 },
+        { src: 'https://fonts.gstatic.com/s/inter/v12/UcC7jAkZ986L5GVpMYRSWpLO6vmDdBvFAmNJ1A.ttf', fontWeight: 700 }, // Bold
+        { src: 'https://fonts.gstatic.com/s/inter/v12/UcC7jAkZ986L5GVpjt8SdyLxBQYZ-ZA.ttf', fontWeight: 900 }
+    ]
+});
+
+// ─── PDF Document Component (Partner Version) ──────────────────────────────
+const PDFStyles = StyleSheet.create({
+    page: { padding: 40, fontFamily: 'Inter', backgroundColor: '#ffffff' },
+    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30, borderBottomWidth: 1, borderBottomColor: '#eeeff2', paddingBottom: 15 },
+    logoSection: { flexDirection: 'column' },
+    logoLabel: { fontSize: 24, fontWeight: 900, color: '#2563eb' },
+    headerTitle: { fontSize: 10, color: '#64748b', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+    badge: { backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, border: '1px solid #dcfce7' },
+    badgeText: { fontSize: 8, color: '#166534', fontWeight: 700 },
+
+    titleSection: { marginBottom: 25 },
+    mainTitle: { fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 5 },
+    subTitle: { fontSize: 10, color: '#64748b' },
+
+    section: { marginBottom: 20 },
+    sectionLabel: { fontSize: 10, fontWeight: 700, color: '#475569', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
+    fieldBox: { width: '47%', marginBottom: 12 },
+    fieldLabel: { fontSize: 8, color: '#94a3b8', marginBottom: 2, textTransform: 'uppercase' },
+    fieldValue: { fontSize: 10, color: '#1e293b', fontWeight: 600 },
+
+    credentialCard: { 
+        backgroundColor: '#f8fafc', 
+        borderRadius: 8, 
+        padding: 15, 
+        border: '1px solid #e2e8f0',
+        marginTop: 10,
+        marginBottom: 20
+    },
+    credentialRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    passwordBox: { backgroundColor: '#ffffff', border: '1px dashed #cbd5e1', padding: 10, marginTop: 10, alignItems: 'center' },
+    passwordText: { fontSize: 14, fontWeight: 700, color: '#ef4444', letterSpacing: 1 },
+
+    noteBox: { backgroundColor: '#fef3c7', padding: 10, borderRadius: 6, marginTop: 10 },
+    noteText: { fontSize: 8, color: '#92400e', lineHeight: 1.4 },
+
+    footer: { position: 'absolute', bottom: 40, left: 40, right: 40, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 15, flexDirection: 'row', justifyContent: 'space-between' },
+    footerText: { fontSize: 7, color: '#94a3b8' }
+});
+
+const CredentialsPDF = ({ creds }) => (
+    <Document>
+        <Page size="A4" style={PDFStyles.page}>
+            {/* Header */}
+            <View style={PDFStyles.header}>
+                <View style={PDFStyles.logoSection}>
+                    <Text style={PDFStyles.logoLabel}>Veda CRM</Text>
+                    <Text style={PDFStyles.headerTitle}>Premium Onboarding Services</Text>
+                </View>
+                <View style={PDFStyles.badge}>
+                    <Text style={PDFStyles.badgeText}>CREDIT PARTNER ACCESS</Text>
+                </View>
+            </View>
+
+            {/* Title */}
+            <View style={PDFStyles.titleSection}>
+                <Text style={PDFStyles.mainTitle}>Access Credentials Issued</Text>
+                <Text style={PDFStyles.subTitle}>Official login details for the Veda Loans Credit Partner Portal.</Text>
+            </View>
+
+            {/* Partner Details */}
+            <View style={PDFStyles.section}>
+                <Text style={PDFStyles.sectionLabel}>Partner Information</Text>
+                <View style={PDFStyles.grid}>
+                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Company Name</Text><Text style={PDFStyles.fieldValue}>{creds.company_name}</Text></View>
+                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Partner ID</Text><Text style={PDFStyles.fieldValue}>{creds.partner_id}</Text></View>
+                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Contact Person</Text><Text style={PDFStyles.fieldValue}>{creds.role === 'Relationship Manager' ? creds.full_name : (creds.full_name || creds.company_name)}</Text></View>
+                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>System Role</Text><Text style={PDFStyles.fieldValue}>Credit Partner</Text></View>
+                </View>
+            </View>
+
+            {/* Credential Card */}
+            <View style={PDFStyles.section}>
+                <Text style={PDFStyles.sectionLabel}>Login Credentials</Text>
+                <View style={PDFStyles.credentialCard}>
+                    <View style={PDFStyles.credentialRow}>
+                        <Text style={PDFStyles.fieldLabel}>Portal Username (Email)</Text>
+                        <Text style={PDFStyles.fieldValue}>{creds.email}</Text>
+                    </View>
+                    <View style={PDFStyles.passwordBox}>
+                        <Text style={PDFStyles.fieldLabel}>Secure One-Time Password</Text>
+                        <Text style={PDFStyles.passwordText}>{creds.password}</Text>
+                    </View>
+
+                    <View style={PDFStyles.noteBox}>
+                        <Text style={PDFStyles.noteText}>IMPORTANT SECURITY NOTICE: This is a one-time generated password. For security reasons, you are REQUIRED to change your password immediately upon your first login to the portal. Do not share these credentials with unauthorized personnel.</Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* Access Point */}
+            <View style={PDFStyles.section}>
+                <Text style={PDFStyles.sectionLabel}>Portal Support Information</Text>
+                <View style={PDFStyles.grid}>
+                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Portal URL</Text><Text style={PDFStyles.fieldValue}>veda-partner-portal.onrender.com</Text></View>
+                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Support Email</Text><Text style={PDFStyles.fieldValue}>support@vedaloans.in</Text></View>
+                </View>
+            </View>
+
+            {/* Footer */}
+            <View style={PDFStyles.footer}>
+                <Text style={PDFStyles.footerText}>Issued: {new Date(creds.created_at).toLocaleString()}</Text>
+                <Text style={PDFStyles.footerText}>Confidential - Internal Access Only</Text>
+            </View>
+        </Page>
+    </Document>
+);
 import { lendingPartnerService, bankService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -119,6 +229,14 @@ const CreditPartners = () => {
     const [resetPartner, setResetPartner] = useState(null);
     const [newPassword, setNewPassword] = useState('');
     const [resetLoading, setResetLoading] = useState(false);
+
+    // Success Credential Modal
+    const [openSuccessModal, setOpenSuccessModal] = useState(false);
+    const [generatedCredentials, setGeneratedCredentials] = useState(null);
+
+    const { profile: currentUser } = useAuth();
+    const isAdmin = ['Super Admin', 'Admin'].includes(currentUser?.role);
+
 
     // ── Snackbar ───────────────────────────────────────────────────────────
     const showSnackbar = useCallback((message, severity = 'success') => {
@@ -199,8 +317,8 @@ const CreditPartners = () => {
         if (partner) {
             setFormData({ ...partner, password: '' });
         } else {
-            const autoPass = Math.random().toString(36).slice(-10) + 'V@1';
-            setFormData({ name: '', bank_id: '', branch_name: '', email: '', phone: '', password: autoPass, status: 'Active', partner_role: 'Relationship Manager' });
+            // Password will be auto-generated by backend now
+            setFormData({ name: '', bank_id: '', branch_name: '', email: '', phone: '', password: '', status: 'Active', partner_role: 'Relationship Manager' });
         }
         setOpenModal(true);
     };
@@ -222,14 +340,21 @@ const CreditPartners = () => {
             };
 
             if (modalMode === 'add') {
-                await lendingPartnerService.create(payload);
+                const response = await lendingPartnerService.create(payload);
                 showSnackbar('Partner created successfully!');
+                
+                // If backend returned credentials, show the success screen
+                if (response.credentials) {
+                    setGeneratedCredentials(response.credentials);
+                    setOpenSuccessModal(true);
+                    setOpenModal(false); // Close the entry modal
+                }
             } else {
                 await lendingPartnerService.update(formData.id, payload);
                 showSnackbar('Partner updated successfully!');
+                setOpenModal(false);
             }
             fetchInitialData();
-            setOpenModal(false);
         } catch (err) {
             setFormError(err.response?.data?.error || 'Operation failed. Try again.');
         } finally {
@@ -305,14 +430,16 @@ const CreditPartners = () => {
                         Manage bank partners, portal access &amp; activity tracking
                     </Typography>
                 </Box>
-                <Button
-                    variant="contained"
-                    startIcon={<Plus size={18} />}
-                    onClick={() => handleOpenModal('add')}
-                    sx={{ borderRadius: 3, px: 3, py: 1.2, fontWeight: 700, flexShrink: 0 }}
-                >
-                    Add Partner
-                </Button>
+                {isAdmin && (
+                    <Button
+                        variant="contained"
+                        startIcon={<Plus size={18} />}
+                        onClick={() => handleOpenModal('add')}
+                        sx={{ borderRadius: 3, px: 3, py: 1.2, fontWeight: 700, flexShrink: 0 }}
+                    >
+                        Add Credit Partner
+                    </Button>
+                )}
             </Box>
 
             {/* ── Stats Bar ───────────────────────────────────────────── */}
@@ -485,6 +612,17 @@ const CreditPartners = () => {
                                                 </Typography>
                                                 <Box sx={{ display: 'flex', gap: 0.5, mt: 0.8, flexWrap: 'wrap' }}>
                                                     <Chip
+                                                        label={partner?.partner_id || 'ID Pending'}
+                                                        size="small"
+                                                        sx={{
+                                                            height: 20,
+                                                            fontSize: '0.65rem',
+                                                            fontWeight: 800,
+                                                            bgcolor: 'primary.main',
+                                                            color: '#fff',
+                                                        }}
+                                                    />
+                                                    <Chip
                                                         icon={<Building2 size={11} />}
                                                         label={partner?.bank_name || 'No Bank'}
                                                         size="small"
@@ -605,133 +743,186 @@ const CreditPartners = () => {
             <Dialog
                 open={openModal}
                 onClose={() => setOpenModal(false)}
-                maxWidth="sm"
+                maxWidth="md"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 4 } }}
+                PaperProps={{ 
+                    sx: { 
+                        borderRadius: 5,
+                        boxShadow: '0 24px 48px rgba(0,0,0,0.15)'
+                    } 
+                }}
             >
-                <DialogTitle sx={{ fontWeight: 900, fontSize: '1.2rem', pb: 0 }}>
-                    {modalMode === 'add' ? '➕ Create New Partner' : '✏️ Edit Partner'}
+                <DialogTitle sx={{ p: 4, pb: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ p: 1.5, bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', borderRadius: 3, display: 'flex' }}>
+                            {modalMode === 'add' ? <Plus size={24} /> : <Edit size={24} />}
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                                {modalMode === 'add' ? 'Onboard New Credit Partner' : 'Edit Partner Details'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {modalMode === 'add' 
+                                    ? 'Setup portal access and mapping for a new external partner.' 
+                                    : 'Update existing partner profile and system permissions.'}
+                            </Typography>
+                        </Box>
+                    </Box>
                 </DialogTitle>
-                <DialogContent>
-                    <Box sx={{ mt: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                        {formError && <Alert severity="error" sx={{ borderRadius: 2 }}>{formError}</Alert>}
 
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                            <TextField
-                                label="Partner Name *"
-                                fullWidth
-                                value={formData.name}
-                                onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            />
-                            <TextField
-                                select
-                                label="Partner Role"
-                                fullWidth
-                                value={formData.partner_role}
-                                onChange={(e) => setFormData(p => ({ ...p, partner_role: e.target.value }))}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            >
-                                {partnerRoles.map(role => (
-                                    <MenuItem key={role} value={role}>{role}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Box>
+                <DialogContent sx={{ p: 4 }}>
+                    <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3.5 }}>
+                        {formError && (
+                            <Alert severity="error" variant="filled" sx={{ borderRadius: 3, fontWeight: 600 }}>
+                                {formError}
+                            </Alert>
+                        )}
 
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                            <TextField
-                                select
-                                label="Select Bank *"
-                                fullWidth
-                                value={formData.bank_id}
-                                onChange={(e) => setFormData(p => ({ ...p, bank_id: e.target.value }))}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            >
-                                {banks.map(bank => (
-                                    <MenuItem key={bank.id} value={bank.id}>{bank.name}</MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField
-                                label="Branch Name"
-                                fullWidth
-                                placeholder="e.g. New Delhi Main"
-                                value={formData.branch_name}
-                                onChange={(e) => setFormData(p => ({ ...p, branch_name: e.target.value }))}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            />
-                        </Box>
+                        <Grid container spacing={3}>
+                            {/* Identity Section */}
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+                                    Partner Identity
+                                </Typography>
+                                <Stack spacing={2.5}>
+                                    <TextField
+                                        label="Full Name / Company Name"
+                                        fullWidth
+                                        required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
+                                        placeholder="e.g. HDFC Bank - SME Cell"
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    />
+                                    <TextField
+                                        select
+                                        label="System Role / Designation"
+                                        fullWidth
+                                        value={formData.partner_role}
+                                        onChange={(e) => setFormData(p => ({ ...p, partner_role: e.target.value }))}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    >
+                                        {partnerRoles.map(role => (
+                                            <MenuItem key={role} value={role}>{role}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                </Stack>
+                            </Grid>
 
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                            <TextField
-                                label="Email Address *"
-                                fullWidth
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            />
-                            <TextField
-                                label="Phone Number"
-                                fullWidth
-                                value={formData.phone}
-                                onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
-                                InputProps={{ sx: { borderRadius: 2 } }}
-                            />
-                        </Box>
+                            {/* Mapping Section */}
+                            <Grid size={{ xs: 12, md: 6 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+                                    Bank Mapping
+                                </Typography>
+                                <Stack spacing={2.5}>
+                                    <TextField
+                                        select
+                                        label="Select Bank Parent"
+                                        fullWidth
+                                        required
+                                        value={formData.bank_id}
+                                        onChange={(e) => setFormData(p => ({ ...p, bank_id: e.target.value }))}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    >
+                                        {banks.map(bank => (
+                                            <MenuItem key={bank.id} value={bank.id}>{bank.name}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                    <TextField
+                                        label="Specific Branch Name"
+                                        fullWidth
+                                        placeholder="e.g. Gurugram Hub"
+                                        value={formData.branch_name}
+                                        onChange={(e) => setFormData(p => ({ ...p, branch_name: e.target.value }))}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    />
+                                </Stack>
+                            </Grid>
 
-                        <TextField
-                            label={modalMode === 'add' ? 'Portal Password *' : 'New Password (leave blank to keep current)'}
-                            fullWidth
-                            type={showPassword ? 'text' : 'password'}
-                            value={formData.password}
-                            onChange={(e) => setFormData(p => ({ ...p, password: e.target.value }))}
-                            helperText={modalMode === 'add' ? 'Share this password with the partner for first login.' : 'Only fill if you want to change the password.'}
-                            InputProps={{
-                                sx: { borderRadius: 2 },
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Tooltip title="Copy password">
-                                            <IconButton size="small" onClick={() => copyToClipboard(formData.password, 'Password copied!')} disabled={!formData.password}>
-                                                <Copy size={15} />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title={showPassword ? 'Hide' : 'Show'}>
-                                            <IconButton size="small" onClick={() => setShowPassword(p => !p)}>
-                                                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Generate new password">
-                                            <IconButton size="small" onClick={() => setFormData(p => ({ ...p, password: Math.random().toString(36).slice(-10) + 'V@1' }))}>
-                                                <RefreshCw size={15} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
+                            {/* Contact Section */}
+                            <Grid size={{ xs: 12 }}>
+                                <Divider sx={{ my: 1 }} />
+                                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1, mt: 1 }}>
+                                    Electronic Communications
+                                </Typography>
+                                <Grid container spacing={3}>
+                                    <Grid size={{ xs: 12, md: 6 }}>
+                                        <TextField
+                                            label="Official Email Address"
+                                            fullWidth
+                                            required
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
+                                            placeholder="partner@bank.com"
+                                            InputProps={{ 
+                                                sx: { borderRadius: 3 },
+                                                startAdornment: <InputAdornment position="start"><Mail size={18} /></InputAdornment>
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, md: 6 }}>
+                                        <TextField
+                                            label="Contact Number"
+                                            fullWidth
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))}
+                                            placeholder="+91 XXXXX XXXXX"
+                                            InputProps={{ 
+                                                sx: { borderRadius: 3 },
+                                                startAdornment: <InputAdornment position="start"><Phone size={18} /></InputAdornment>
+                                            }}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
 
-                        <TextField
-                            select
-                            label="Account Status"
-                            fullWidth
-                            value={formData.status}
-                            onChange={(e) => setFormData(p => ({ ...p, status: e.target.value }))}
-                            InputProps={{ sx: { borderRadius: 2 } }}
-                        >
-                            <MenuItem value="Active">✅ Active</MenuItem>
-                            <MenuItem value="Inactive">⏸️ Inactive</MenuItem>
-                        </TextField>
+                            {modalMode === 'edit' && (
+                                <Grid size={{ xs: 12 }}>
+                                    <TextField
+                                        select
+                                        label="Account Status"
+                                        fullWidth
+                                        value={formData.status}
+                                        onChange={(e) => setFormData(p => ({ ...p, status: e.target.value }))}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    >
+                                        <MenuItem value="Active">✅ Active Access</MenuItem>
+                                        <MenuItem value="Inactive">⏸️ Suspended / Inactive</MenuItem>
+                                    </TextField>
+                                </Grid>
+                            )}
+                        </Grid>
                     </Box>
                 </DialogContent>
-                <DialogActions sx={{ p: 3, pt: 1 }}>
-                    <Button onClick={() => setOpenModal(false)} sx={{ fontWeight: 600 }}>Cancel</Button>
+
+                <DialogActions sx={{ p: 4, pt: 1, gap: 1.5 }}>
+                    <Button 
+                        onClick={() => setOpenModal(false)} 
+                        sx={{ fontWeight: 700, color: 'text.secondary' }}
+                    >
+                        Cancel
+                    </Button>
                     <Button
                         variant="contained"
                         onClick={handleSubmit}
                         disabled={saving}
-                        sx={{ fontWeight: 700, px: 4, borderRadius: 2.5 }}
+                        fullWidth={modalMode === 'add'}
+                        sx={{ 
+                            fontWeight: 800, 
+                            px: 4, 
+                            py: 1.5,
+                            borderRadius: 3,
+                            boxShadow: '0 8px 16px rgba(37, 99, 235, 0.2)'
+                        }}
                     >
-                        {saving ? <CircularProgress size={20} color="inherit" /> : modalMode === 'add' ? 'Create Partner' : 'Save Changes'}
+                        {saving ? (
+                            <CircularProgress size={20} color="inherit" />
+                        ) : modalMode === 'add' ? (
+                            'Create Partner & Generate Credentials'
+                        ) : (
+                            'Save Profile Changes'
+                        )}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -849,6 +1040,160 @@ const CreditPartners = () => {
             </Dialog>
 
             {/* ── Snackbar ──────────────────────────────────────────────── */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* Success / Credentials Modal                                */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            <Dialog
+                open={openSuccessModal}
+                onClose={() => setOpenSuccessModal(false)}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: { borderRadius: 5, overflow: 'hidden' }
+                }}
+            >
+                <DialogTitle sx={{ p: 4, pb: 2, textAlign: 'center', bgcolor: alpha('#10b981', 0.03) }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                        <Box sx={{ p: 1.5, bgcolor: '#10b981', borderRadius: '50%', color: '#fff', display: 'flex' }}>
+                            <CheckCircle2 size={32} strokeWidth={3} />
+                        </Box>
+                        <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.primary' }}>
+                            Credit Partner Credentials Issued Successfully
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Access credentials have been generated and the welcome email is being dispatched.
+                        </Typography>
+                    </Box>
+                </DialogTitle>
+
+                <DialogContent sx={{ p: 4 }}>
+                    <Grid container spacing={3}>
+                        {/* Partner Identity Card */}
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Box sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: 4, height: '100%' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                                    <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 800 }}>
+                                        <Building2 size={20} />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', textTransform: 'uppercase' }}>
+                                            Partner Identity
+                                        </Typography>
+                                        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                                            {generatedCredentials?.company_name}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+
+                                <Stack spacing={2}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography variant="body2" color="text.secondary">Partner ID</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                                            {generatedCredentials?.partner_id}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography variant="body2" color="text.secondary">System Role</Typography>
+                                        <Chip label="Credit Partner" size="small" sx={{ fontWeight: 800, bgcolor: 'primary.main', color: '#fff' }} />
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography variant="body2" color="text.secondary">Contact Group</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{generatedCredentials?.role}</Typography>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        </Grid>
+
+                        {/* Login Credentials Card */}
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Box sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: 4, height: '100%', bgcolor: alpha(theme.palette.success.main, 0.02) }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                                    <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), color: 'success.main', fontWeight: 800 }}>
+                                        <Lock size={20} />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'success.main', textTransform: 'uppercase' }}>
+                                            Login Credentials
+                                        </Typography>
+                                        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                                            Secure Access Details
+                                        </Typography>
+                                    </Box>
+                                </Box>
+
+                                <Stack spacing={2.5}>
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.5 }}>Login Email</Typography>
+                                        <Typography variant="body1" sx={{ fontWeight: 800, fontStyle: 'italic', color: 'primary.main' }}>
+                                            {generatedCredentials?.email}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#ffffff', border: '1px dashed', borderColor: 'divider', position: 'relative' }}>
+                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.5 }}>Temporary Password</Typography>
+                                        <Typography variant="h5" sx={{ fontWeight: 900, color: 'error.main', letterSpacing: 2 }}>
+                                            {generatedCredentials?.password}
+                                        </Typography>
+                                        <IconButton
+                                            size="small"
+                                            sx={{ position: 'absolute', top: 12, right: 12 }}
+                                            onClick={() => copyToClipboard(generatedCredentials?.password, 'Password copied!')}
+                                        >
+                                            <Copy size={16} />
+                                        </IconButton>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        </Grid>
+                    </Grid>
+
+                    <Box sx={{ mt: 3, p: 2, bgcolor: alpha('#f59e0b', 0.08), borderRadius: 3, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                        <Info size={20} color="#d97706" style={{ marginTop: 2, flexShrink: 0 }} />
+                        <Typography variant="body2" sx={{ color: '#92400e', lineHeight: 1.5 }}>
+                            <strong>Security Note:</strong> These credentials will only be displayed <strong>once</strong>. Please ensure you download the PDF summary or copy the temporary password before closing this window. The partner is required to change their password upon their first login.
+                        </Typography>
+                    </Box>
+                </DialogContent>
+
+                <DialogActions sx={{ p: 4, pt: 1, justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    {generatedCredentials && (
+                        <PDFDownloadLink
+                            document={<CredentialsPDF creds={generatedCredentials} />}
+                            fileName={`VEDA_Partner_Onboarding_${generatedCredentials.partner_id}.pdf`}
+                            style={{ textDecoration: 'none' }}
+                        >
+                            {({ loading }) => (
+                                <Button
+                                    variant="contained"
+                                    color="success"
+                                    startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <Download size={18} />}
+                                    sx={{ borderRadius: 3, px: 4, py: 1.5, fontWeight: 800, fontSize: '0.95rem', boxShadow: '0 8px 16px rgba(16, 185, 129, 0.25)' }}
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Preparing Document...' : 'Download Enrollment PDF'}
+                                </Button>
+                            )}
+                        </PDFDownloadLink>
+                    )}
+
+                    <Button
+                        variant="outlined"
+                        startIcon={<Mail size={18} />}
+                        sx={{ borderRadius: 3, px: 3, py: 1.5, fontWeight: 700 }}
+                        onClick={() => showSnackbar('Email Dispatching via Resend...', 'info')}
+                    >
+                        Resend Welcome Email
+                    </Button>
+
+                    <Button
+                        onClick={() => setOpenSuccessModal(false)}
+                        sx={{ fontWeight: 700, color: 'text.secondary', px: 3 }}
+                    >
+                        Close Window
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={3000}
