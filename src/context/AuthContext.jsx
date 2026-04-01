@@ -1,29 +1,40 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { authService } from '../services/api';
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        const savedProfile = localStorage.getItem('profile');
-
-        if (savedUser && savedProfile) {
-            setUser(JSON.parse(savedUser));
-            setProfile(JSON.parse(savedProfile));
+    // Initialize from localStorage to avoid hydration mismatch
+    const [user, setUser] = useState(() => {
+        try {
+            const savedUser = localStorage.getItem('user');
+            return savedUser ? JSON.parse(savedUser) : null;
+        } catch {
+            return null;
         }
-        setLoading(false);
-    }, []);
+    });
+    
+    const [profile, setProfile] = useState(() => {
+        try {
+            const savedProfile = localStorage.getItem('profile');
+            return savedProfile ? JSON.parse(savedProfile) : null;
+        } catch {
+            return null;
+        }
+    });
+    
+    const [loading, setLoading] = useState(false);
+
+    // Helper check for role-based access
+    const hasRole = useMemo(() => (roles) => {
+        if (!profile) return false;
+        return roles.includes(profile.role);
+    }, [profile]);
 
     const signIn = async (email, password) => {
         try {
             const data = await authService.login(email, password);
             
-            // Unified session handling
             if (data.user && data.profile) {
                 setUser(data.user);
                 setProfile(data.profile);
@@ -33,7 +44,6 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('session', JSON.stringify(data.session));
                 localStorage.setItem('user_type', data.user_type);
 
-                // For legacy compatibility with partner components
                 if (data.user_type === 'Partner') {
                     localStorage.setItem('partner', JSON.stringify(data.profile));
                     localStorage.setItem('partner_token', data.session.access_token);
@@ -57,14 +67,13 @@ export const AuthProvider = ({ children }) => {
             setUser(data.user);
             setProfile(data.profile);
 
-            // Save to local storage for persistence
             localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.setItem('profile', JSON.stringify(data.profile));
             localStorage.setItem('session', JSON.stringify(data.session));
 
             return { data, error: null };
         } catch (error) {
-            console.error('OTP Verification failed (Step 2):', error);
+            console.error('OTP Verification failed:', error);
             return {
                 data: null,
                 error: error.response?.data?.error || 'Invalid OTP'
@@ -83,14 +92,18 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('partner_token');
     };
 
-    // Helper check for role-based access
-    const hasRole = (roles) => {
-        if (!profile) return false;
-        return roles.includes(profile.role);
-    };
+    const value = useMemo(() => ({
+        user,
+        profile,
+        loading,
+        signIn,
+        verifySignIn,
+        signOut,
+        hasRole
+    }), [user, profile, loading, hasRole]);
 
     return (
-        <AuthContext.Provider value={{ user, profile, loading, signIn, verifySignIn, signOut, hasRole }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );

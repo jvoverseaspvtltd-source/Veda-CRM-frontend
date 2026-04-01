@@ -77,155 +77,109 @@ import {
     Image 
 } from '@react-pdf/renderer';
 
-// ─── PDF Document Component (Premium Finance Style) ─────────────────────────
+// ─── PDF Document Component (Premium Finance Style - One Page) ─────────────────────────
 // Using built-in Helvetica font for maximum compatibility
 const PDFStyles = StyleSheet.create({
-    page: { padding: 40, fontFamily: 'Helvetica', backgroundColor: '#ffffff' },
+    page: { padding: 35, fontFamily: 'Helvetica', backgroundColor: '#ffffff' },
     header: { 
         flexDirection: 'row', 
         justifyContent: 'space-between', 
-        marginBottom: 30, 
+        marginBottom: 12, 
         borderBottomWidth: 2, 
         borderBottomColor: '#0f172a', 
-        paddingBottom: 20 
+        paddingBottom: 12 
     },
     logoSection: { flexDirection: 'column' },
-    logoLabel: { fontSize: 26, fontWeight: 'bold', color: '#0f172a' },
-    headerSubtitle: { fontSize: 9, color: '#64748b', marginTop: 3, textTransform: 'uppercase', letterSpacing: 1 },
+    logoLabel: { fontSize: 22, fontWeight: 'bold', color: '#0f172a' },
+    headerSubtitle: { fontSize: 8, color: '#64748b', marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.5 },
     badge: { 
         backgroundColor: '#f0fdf4', 
-        paddingHorizontal: 10, 
-        paddingVertical: 4, 
-        borderRadius: 4, 
+        paddingHorizontal: 8, 
+        paddingVertical: 3, 
+        borderRadius: 3, 
         border: '1px solid #dcfce7' 
     },
-    badgeText: { fontSize: 8, color: '#166534', fontWeight: 'bold' },
+    badgeText: { fontSize: 7, color: '#166534', fontWeight: 'bold' },
 
     divider: { 
-        height: 4, 
+        height: 3, 
         backgroundColor: '#2563eb', 
-        marginBottom: 25 
+        marginBottom: 12 
     },
 
-    titleSection: { marginBottom: 30 },
-    mainTitle: { fontSize: 22, fontWeight: 'bold', color: '#0f172a', marginBottom: 8 },
-    subTitle: { fontSize: 11, color: '#64748b' },
-    docId: { fontSize: 9, color: '#94a3b8', marginTop: 4 },
+    titleSection: { marginBottom: 12 },
+    mainTitle: { fontSize: 16, fontWeight: 'bold', color: '#0f172a', marginBottom: 4 },
+    subTitle: { fontSize: 9, color: '#64748b' },
+    docId: { fontSize: 8, color: '#94a3b8', marginTop: 2 },
 
-    section: { marginBottom: 25 },
+    section: { marginBottom: 10 },
     sectionHeader: { 
         flexDirection: 'row', 
         alignItems: 'center', 
-        marginBottom: 15,
+        marginBottom: 8,
         borderBottom: '1px solid #e2e8f0',
-        paddingBottom: 8
+        paddingBottom: 4
     },
-    sectionLabel: { fontSize: 11, fontWeight: 'bold', color: '#2563eb', textTransform: 'uppercase', letterSpacing: 1 },
-    sectionIcon: { marginRight: 8 },
+    sectionLabel: { fontSize: 9, fontWeight: 'bold', color: '#2563eb', textTransform: 'uppercase', letterSpacing: 0.5 },
     
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
-    fieldBox: { width: '47%', marginBottom: 15 },
-    fieldLabel: { fontSize: 8, color: '#94a3b8', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 },
-    fieldValue: { fontSize: 11, color: '#1e293b', fontWeight: 'bold' },
-    fieldValueLarge: { fontSize: 13, color: '#0f172a', fontWeight: 'bold' },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    fieldBox: { width: '48%', marginBottom: 6 },
+    fieldLabel: { fontSize: 7, color: '#94a3b8', marginBottom: 1, textTransform: 'uppercase' },
+    fieldValue: { fontSize: 9, color: '#1e293b', fontWeight: 'bold' },
+    fieldValueLarge: { fontSize: 11, color: '#0f172a', fontWeight: 'bold' },
 
     credentialCard: { 
         backgroundColor: '#f8fafc', 
-        borderRadius: 10, 
-        padding: 20, 
+        borderRadius: 6, 
+        padding: 12, 
         border: '1px solid #e2e8f0',
-        borderLeftWidth: 4,
+        borderLeftWidth: 3,
         borderLeftColor: '#2563eb',
-        marginTop: 10,
-        marginBottom: 20
+        marginBottom: 10
     },
-    credentialRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, alignItems: 'center' },
+    credentialRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, alignItems: 'center' },
     credentialDivider: { 
         borderBottom: '1px dashed #cbd5e1', 
-        marginVertical: 15 
+        marginVertical: 8 
     },
     passwordBox: { 
         backgroundColor: '#ffffff', 
-        border: '2px dashed #2563eb', 
-        padding: 15, 
-        marginTop: 12, 
+        border: '2px dashed #dc2626', 
+        padding: 10, 
+        marginTop: 8, 
         alignItems: 'center',
-        borderRadius: 8
+        borderRadius: 4
     },
-    passwordLabel: { fontSize: 9, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
-    passwordText: { fontSize: 18, fontWeight: 'bold', color: '#dc2626', letterSpacing: 3 },
+    passwordLabel: { fontSize: 7, color: '#64748b', marginBottom: 4, textTransform: 'uppercase' },
+    passwordText: { fontSize: 14, fontWeight: 'bold', color: '#dc2626', letterSpacing: 2 },
 
-    accessCard: {
-        backgroundColor: '#eff6ff',
-        borderRadius: 8,
-        padding: 15,
-        marginTop: 10,
-        border: '1px solid #bfdbfe'
-    },
-    accessRow: { flexDirection: 'row', marginBottom: 8, alignItems: 'center' },
-    accessLabel: { fontSize: 9, color: '#1e40af', fontWeight: 'bold', width: 100 },
-    accessValue: { fontSize: 10, color: '#1e293b', fontWeight: 'bold', flex: 1 },
-
-    supportCard: {
-        backgroundColor: '#fefce8',
-        borderRadius: 8,
-        padding: 15,
-        marginTop: 15,
-        border: '1px solid #fef08a'
-    },
-    supportTitle: { fontSize: 10, fontWeight: 'bold', color: '#854d0e', marginBottom: 10 },
-    supportRow: { flexDirection: 'row', marginBottom: 6, alignItems: 'center' },
-    supportLabel: { fontSize: 9, color: '#92400e', width: 120 },
-    supportValue: { fontSize: 10, color: '#713f12', fontWeight: 'bold' },
+    twoColumn: { flexDirection: 'row', gap: 10 },
+    leftColumn: { flex: 1 },
+    rightColumn: { flex: 1 },
 
     noteBox: { 
         backgroundColor: '#fef3c7', 
-        padding: 12, 
-        borderRadius: 6, 
-        marginTop: 15,
-        borderLeftWidth: 4,
+        padding: 8, 
+        borderRadius: 4, 
+        marginTop: 8,
+        borderLeftWidth: 3,
         borderLeftColor: '#f59e0b'
     },
-    noteText: { fontSize: 9, color: '#92400e', lineHeight: 1.5 },
-
-    nextSteps: {
-        backgroundColor: '#f0fdf4',
-        borderRadius: 8,
-        padding: 15,
-        marginTop: 15,
-        border: '1px solid #bbf7d0'
-    },
-    nextStepsTitle: { fontSize: 10, fontWeight: 'bold', color: '#166534', marginBottom: 8 },
-    stepRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'flex-start' },
-    stepNumber: { 
-        width: 18, 
-        height: 18, 
-        borderRadius: 9, 
-        backgroundColor: '#10b981', 
-        color: '#fff', 
-        fontSize: 9, 
-        fontWeight: 'bold',
-        textAlign: 'center',
-        lineHeight: 18,
-        marginRight: 8
-    },
-    stepText: { fontSize: 9, color: '#166534', flex: 1, lineHeight: 1.4 },
+    noteText: { fontSize: 7, color: '#92400e', lineHeight: 1.3 },
 
     footer: { 
         position: 'absolute', 
-        bottom: 30, 
-        left: 40, 
-        right: 40, 
+        bottom: 25, 
+        left: 35, 
+        right: 35, 
         borderTopWidth: 1, 
         borderTopColor: '#f1f5f9', 
-        paddingTop: 15, 
+        paddingTop: 8, 
         flexDirection: 'row', 
         justifyContent: 'space-between' 
     },
-    footerLeft: { flexDirection: 'column' },
-    footerRight: { alignItems: 'flex-end' },
-    footerText: { fontSize: 8, color: '#94a3b8', marginBottom: 2 },
-    footerConfidential: { fontSize: 9, color: '#dc2626', fontWeight: 'bold' }
+    footerText: { fontSize: 7, color: '#94a3b8', marginBottom: 1 },
+    footerConfidential: { fontSize: 8, color: '#dc2626', fontWeight: 'bold' }
 });
 
 const CredentialsPDF = ({ creds, createdBy }) => (
@@ -235,7 +189,7 @@ const CredentialsPDF = ({ creds, createdBy }) => (
             <View style={PDFStyles.header}>
                 <View style={PDFStyles.logoSection}>
                     <Text style={PDFStyles.logoLabel}>VEDA CRM</Text>
-                    <Text style={PDFStyles.headerSubtitle}>Premium Credit Partner Onboarding</Text>
+                    <Text style={PDFStyles.headerSubtitle}>Credit Partner Onboarding</Text>
                 </View>
                 <View style={PDFStyles.badge}>
                     <Text style={PDFStyles.badgeText}>CREDIT PARTNER ACCESS</Text>
@@ -252,132 +206,92 @@ const CredentialsPDF = ({ creds, createdBy }) => (
                 <Text style={PDFStyles.docId}>Document ID: {creds.partner_id} | Issued: {new Date(creds.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</Text>
             </View>
 
-            {/* Partner Information */}
-            <View style={PDFStyles.section}>
-                <View style={PDFStyles.sectionHeader}>
-                    <Text style={PDFStyles.sectionLabel}>01. Partner Information</Text>
-                </View>
-                <View style={PDFStyles.grid}>
-                    <View style={PDFStyles.fieldBox}>
-                        <Text style={PDFStyles.fieldLabel}>Company / Business Name</Text>
-                        <Text style={PDFStyles.fieldValueLarge}>{creds.company_name}</Text>
-                    </View>
-                    <View style={PDFStyles.fieldBox}>
-                        <Text style={PDFStyles.fieldLabel}>Partner ID</Text>
-                        <Text style={PDFStyles.fieldValueLarge}>{creds.partner_id}</Text>
-                    </View>
-                    <View style={PDFStyles.fieldBox}>
-                        <Text style={PDFStyles.fieldLabel}>Partner Type</Text>
-                        <Text style={PDFStyles.fieldValue}>{creds.partner_type || 'Credit Partner'}</Text>
-                    </View>
-                    <View style={PDFStyles.fieldBox}>
-                        <Text style={PDFStyles.fieldLabel}>Branch / Location</Text>
-                        <Text style={PDFStyles.fieldValue}>{creds.branch_name || 'Headquarters'}</Text>
-                    </View>
-                    <View style={PDFStyles.fieldBox}>
-                        <Text style={PDFStyles.fieldLabel}>Contact Person</Text>
-                        <Text style={PDFStyles.fieldValue}>{creds.full_name || creds.company_name}</Text>
-                    </View>
-                    <View style={PDFStyles.fieldBox}>
-                        <Text style={PDFStyles.fieldLabel}>System Role</Text>
-                        <Text style={PDFStyles.fieldValue}>{creds.role || 'Credit Partner'}</Text>
-                    </View>
-                </View>
-            </View>
-
-            {/* Login Credentials */}
-            <View style={PDFStyles.section}>
-                <View style={PDFStyles.sectionHeader}>
-                    <Text style={PDFStyles.sectionLabel}>02. Portal Login Credentials</Text>
-                </View>
-                <View style={PDFStyles.credentialCard}>
-                    <View style={PDFStyles.credentialRow}>
+            {/* Two Column Layout */}
+            <View style={PDFStyles.twoColumn}>
+                {/* Left Column - Partner Info */}
+                <View style={PDFStyles.leftColumn}>
+                    {/* Partner Information */}
+                    <View style={PDFStyles.section}>
+                        <View style={PDFStyles.sectionHeader}>
+                            <Text style={PDFStyles.sectionLabel}>01. Partner Details</Text>
+                        </View>
                         <View>
-                            <Text style={PDFStyles.fieldLabel}>Portal Username (Corporate Email)</Text>
-                            <Text style={PDFStyles.fieldValueLarge}>{creds.email}</Text>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>Company Name</Text>
+                                <Text style={PDFStyles.fieldValue}>{creds.company_name}</Text>
+                            </View>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>Partner ID</Text>
+                                <Text style={PDFStyles.fieldValue}>{creds.partner_id}</Text>
+                            </View>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>Partner Type</Text>
+                                <Text style={PDFStyles.fieldValue}>{creds.partner_type || 'Credit Partner'}</Text>
+                            </View>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>Branch</Text>
+                                <Text style={PDFStyles.fieldValue}>{creds.branch_name || 'Headquarters'}</Text>
+                            </View>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>System Role</Text>
+                                <Text style={PDFStyles.fieldValue}>{creds.role || 'Credit Partner'}</Text>
+                            </View>
                         </View>
                     </View>
-                    
-                    <View style={PDFStyles.credentialDivider} />
-                    
-                    <View style={PDFStyles.passwordBox}>
-                        <Text style={PDFStyles.passwordLabel}>Initial Generated Password (One-Time)</Text>
-                        <Text style={PDFStyles.passwordText}>{creds.password}</Text>
+
+                    {/* Portal Access */}
+                    <View style={PDFStyles.section}>
+                        <View style={PDFStyles.sectionHeader}>
+                            <Text style={PDFStyles.sectionLabel}>02. Portal Access</Text>
+                        </View>
+                        <View>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>Login URL</Text>
+                                <Text style={PDFStyles.fieldValue}>crm.vedaloansandfinance.com</Text>
+                            </View>
+                            <View style={PDFStyles.fieldBox}>
+                                <Text style={PDFStyles.fieldLabel}>Support Email</Text>
+                                <Text style={PDFStyles.fieldValue}>support@vedaloans.in</Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Right Column - Credentials */}
+                <View style={PDFStyles.rightColumn}>
+                    {/* Login Credentials */}
+                    <View style={PDFStyles.section}>
+                        <View style={PDFStyles.sectionHeader}>
+                            <Text style={PDFStyles.sectionLabel}>03. Login Credentials</Text>
+                        </View>
+                        <View style={PDFStyles.credentialCard}>
+                            <View>
+                                <Text style={PDFStyles.fieldLabel}>Email (Username)</Text>
+                                <Text style={PDFStyles.fieldValueLarge}>{creds.email}</Text>
+                            </View>
+                            
+                            <View style={PDFStyles.credentialDivider} />
+                            
+                            <View style={PDFStyles.passwordBox}>
+                                <Text style={PDFStyles.passwordLabel}>Password</Text>
+                                <Text style={PDFStyles.passwordText}>{creds.password}</Text>
+                            </View>
+                        </View>
                     </View>
 
+                    {/* Security Notice */}
                     <View style={PDFStyles.noteBox}>
                         <Text style={PDFStyles.noteText}>
-                            <Text style={{ fontWeight: 700 }}>SECURITY NOTICE:</Text> This is a system-generated one-time password. The partner MUST change their password immediately upon first login to the portal. Do not share these credentials with unauthorized personnel.
+                            <Text style={{ fontWeight: 'bold' }}>SECURITY:</Text> Change password on first login. Do not share credentials.
                         </Text>
                     </View>
                 </View>
             </View>
 
-            {/* Portal Access Information */}
-            <View style={PDFStyles.section}>
-                <View style={PDFStyles.sectionHeader}>
-                    <Text style={PDFStyles.sectionLabel}>03. Portal Access Information</Text>
-                </View>
-                <View style={PDFStyles.accessCard}>
-                    <View style={PDFStyles.accessRow}>
-                        <Text style={PDFStyles.accessLabel}>Portal URL</Text>
-                        <Text style={PDFStyles.accessValue}>veda-partner-portal.onrender.com</Text>
-                    </View>
-                    <View style={PDFStyles.accessRow}>
-                        <Text style={PDFStyles.accessLabel}>API Base URL</Text>
-                        <Text style={PDFStyles.accessValue}>api.vedaloans.in/v1</Text>
-                    </View>
-                    <View style={PDFStyles.accessRow}>
-                        <Text style={PDFStyles.accessLabel}>Access Level</Text>
-                        <Text style={PDFStyles.accessValue}>Credit Partner - External</Text>
-                    </View>
-                </View>
-            </View>
-
-            {/* Support Information */}
-            <View style={PDFStyles.supportCard}>
-                <Text style={PDFStyles.supportTitle}>Dedicated Support Contact</Text>
-                <View style={PDFStyles.supportRow}>
-                    <Text style={PDFStyles.supportLabel}>Support Email</Text>
-                    <Text style={PDFStyles.supportValue}>support@vedaloans.in</Text>
-                </View>
-                <View style={PDFStyles.supportRow}>
-                    <Text style={PDFStyles.supportLabel}>Partner Helpline</Text>
-                    <Text style={PDFStyles.supportValue}>+91 11 4567 8900</Text>
-                </View>
-                <View style={PDFStyles.supportRow}>
-                    <Text style={PDFStyles.supportLabel}>Relationship Manager</Text>
-                    <Text style={PDFStyles.supportValue}>{createdBy || 'Veda CRM Team'}</Text>
-                </View>
-            </View>
-
-            {/* Next Steps */}
-            <View style={PDFStyles.nextSteps}>
-                <Text style={PDFStyles.nextStepsTitle}>Important Next Steps</Text>
-                <View style={PDFStyles.stepRow}>
-                    <Text style={PDFStyles.stepNumber}>1</Text>
-                    <Text style={PDFStyles.stepText}>Share these credentials securely with the credit partner via encrypted email or secure messaging.</Text>
-                </View>
-                <View style={PDFStyles.stepRow}>
-                    <Text style={PDFStyles.stepNumber}>2</Text>
-                    <Text style={PDFStyles.stepText}>Partner must change their password immediately upon first portal login.</Text>
-                </View>
-                <View style={PDFStyles.stepRow}>
-                    <Text style={PDFStyles.stepNumber}>3</Text>
-                    <Text style={PDFStyles.stepText}>Complete KYC/verification documents via the partner portal if not already done.</Text>
-                </View>
-            </View>
-
             {/* Footer */}
             <View style={PDFStyles.footer}>
-                <View style={PDFStyles.footerLeft}>
-                    <Text style={PDFStyles.footerText}>Created by: {createdBy || 'Veda CRM Admin'}</Text>
-                    <Text style={PDFStyles.footerText}>{new Date(creds.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</Text>
-                </View>
-                <View style={PDFStyles.footerRight}>
-                    <Text style={PDFStyles.footerConfidential}>⚠ CONFIDENTIAL - INTERNAL USE ONLY</Text>
-                    <Text style={PDFStyles.footerText}>Veda Loans CRM | www.vedaloans.in</Text>
-                </View>
+                <Text style={PDFStyles.footerText}>Created by: {createdBy || 'Veda CRM Admin'} | {new Date(creds.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</Text>
+                <Text style={PDFStyles.footerConfidential}>⚠ CONFIDENTIAL</Text>
             </View>
         </Page>
     </Document>
@@ -1610,7 +1524,7 @@ const CreditPartners = () => {
                                 <Stack spacing={1}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <Typography variant="caption" color="text.secondary">Portal URL</Typography>
-                                        <Typography variant="caption" sx={{ fontWeight: 700 }}>veda-partner-portal.onrender.com</Typography>
+                                        <Typography variant="caption" sx={{ fontWeight: 700 }}>crm.vedaloansandfinance.com</Typography>
                                     </Box>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <Typography variant="caption" color="text.secondary">API Endpoint</Typography>

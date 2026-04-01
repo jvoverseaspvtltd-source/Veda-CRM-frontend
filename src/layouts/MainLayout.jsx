@@ -46,7 +46,8 @@ import {
     ChevronRight,
     LifeBuoy,
     FileArchive,
-    MessageSquareDiff
+    MessageSquareDiff,
+    Trash2
 } from 'lucide-react';
 import { notificationService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -145,6 +146,7 @@ const MainLayout = ({ children }) => {
         { text: 'Tracking Analytics', icon: <TrendingUp size={20} />, path: '/tracking-dashboard', roles: ['Super Admin', 'Admin'] },
         { text: 'Chat', icon: <MessageSquareDiff size={20} />, path: role === 'Partner' ? '/partner/chat' : '/veda/chat', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Partner'] },
         { text: 'Help Desk', icon: <LifeBuoy size={20} />, path: '/help-desk', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
+        { text: 'Trash', icon: <Trash2 size={20} />, path: '/trash', roles: ['Super Admin', 'Admin'] },
     ];
 
     const filteredMenu = menuItems.filter(item => item.roles.includes(role));

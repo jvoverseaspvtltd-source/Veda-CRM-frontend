@@ -8,7 +8,7 @@ import {
 import {
     LayoutDashboard, UserCircle, Headphones, BadgeDollarSign,
     TrendingUp, MessageSquare, Settings,
-    LogOut, Menu, X, Building2
+    LogOut, Menu, X, Building2, ClipboardList
 } from 'lucide-react';
 import { usePartnerAuth } from '../context/PartnerAuthContext';
 
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
     { label: 'Commissions',     path: '/partner/commissions',  icon: BadgeDollarSign },
     { label: 'Performance',     path: '/partner/performance',  icon: TrendingUp },
     { label: 'Settings',        path: '/partner/settings',     icon: Settings },
+    { label: 'My Tasks',        path: '/partner/my-tasks',     icon: ClipboardList },
 ];
 
 const PartnerPortalLayout = () => {

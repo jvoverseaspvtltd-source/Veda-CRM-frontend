@@ -42,6 +42,8 @@ const PartnerCommissions = lazy(() => import('./pages/partner/PartnerCommissions
 const PartnerPerformance = lazy(() => import('./pages/partner/PartnerPerformance'));
 const PartnerChat = lazy(() => import('./pages/partner/PartnerChat'));
 const PartnerSettings = lazy(() => import('./pages/partner/PartnerSettings'));
+const Trash = lazy(() => import('./pages/Trash'));
+const MyTasks = lazy(() => import('./pages/partner/MyTasks'));
 
 const PageLoader = () => (
     <Box sx={{ display: 'flex', height: '60vh', alignItems: 'center', justifyContent: 'center' }}>
@@ -57,9 +59,22 @@ const LazyPage = ({ children }) => (
 
 const ProtectedRoute = ({ children, roles }) => {
     const { user, profile, loading, hasRole } = useAuth();
-    if (loading) return <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>;
-    if (!user) return <Navigate to="/login" />;
-    if (roles && !hasRole(roles)) return <Navigate to="/" />;
+    
+    // Show loading only on initial mount, not on refresh
+    if (loading) {
+        return <Box sx={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>;
+    }
+    
+    // No user found - redirect to login
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
+    
+    // Role check if specified
+    if (roles && !hasRole(roles)) {
+        return <Navigate to="/" />;
+    }
+    
     return children;
 };
 
@@ -94,6 +109,7 @@ function App() {
                     <Route path="/forms" element={<ProtectedRoute><MainLayout><LazyPage><Forms /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/help-desk" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner']}><MainLayout><LazyPage><HelpDesk /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/zip-transactions" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><ZipTransactions /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/trash" element={<ProtectedRoute roles={['Super Admin', 'Admin']}><MainLayout><LazyPage><Trash /></LazyPage></MainLayout></ProtectedRoute>} />
                     
                     {/* Legacy Public Forms */}
                     <Route path="/apply" element={<PublicForm />} />
@@ -110,6 +126,7 @@ function App() {
                             <Route path="performance" element={<LazyPage><PartnerPerformance /></LazyPage>} />
                             <Route path="chat" element={<LazyPage><PartnerChat /></LazyPage>} />
                             <Route path="chat/user/:id" element={<LazyPage><PartnerChat /></LazyPage>} />
+                            <Route path="my-tasks" element={<LazyPage><MyTasks /></LazyPage>} />
                             <Route path="settings" element={<LazyPage><PartnerSettings /></LazyPage>} />
                         </Route>
                     </Route>

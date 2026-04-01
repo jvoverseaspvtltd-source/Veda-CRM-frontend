@@ -355,6 +355,10 @@ export const applicationService = {
         const response = await api.get(`/applications/${id}`);
         return response.data;
     },
+    create: async (data) => {
+        const response = await api.post('/applications', data);
+        return response.data;
+    },
     update: async (id, data) => {
         const response = await api.put(`/applications/${id}`, data);
         return response.data;
@@ -365,6 +369,36 @@ export const applicationService = {
     },
     addNote: async (id, note) => {
         const response = await api.post(`/applications/${id}/notes`, { note });
+        return response.data;
+    },
+    uploadDocument: async (formData) => {
+        const response = await api.post('/applications/upload-document', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        return response.data;
+    },
+    shareWithPartner: async (applicationId, partnerId) => {
+        const response = await api.post('/applications/share', { applicationId, partnerId });
+        return response.data;
+    },
+    getSharedApplications: async () => {
+        const response = await api.get('/applications/shared');
+        return response.data;
+    },
+    getTrash: async () => {
+        const response = await api.get('/applications/trash');
+        return response.data;
+    },
+    restore: async (id) => {
+        const response = await api.post(`/applications/${id}/restore`);
+        return response.data;
+    },
+    getHistory: async (id) => {
+        const response = await api.get(`/applications/${id}/history`);
+        return response.data;
+    },
+    addHistory: async (id, data) => {
+        const response = await api.post(`/applications/${id}/history`, data);
         return response.data;
     }
 };
