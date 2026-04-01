@@ -275,49 +275,114 @@ const Employees = () => {
             </TableContainer>
 
             {/* Add Employee Modal */}
-            <Dialog open={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 4, p: 1 } }}>
-                <DialogTitle sx={{ fontWeight: 900, display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <ShieldCheck className="text-primary-main" size={24} /> Register System Access
-                </DialogTitle>
-                <DialogContent dividers>
-                    <Grid container spacing={3} sx={{ mt: 0.5 }}>
-                        <Grid item xs={12}>
-                            <Typography variant="caption" sx={{ display: 'block', mb: 2, color: 'warning.main', fontWeight: 700, bgcolor: 'warning.light', p: 1.5, borderRadius: 2 }}>
-                                Employee IDs and Passwords will be securely auto-generated. Ensure email address is correct.
+            <Dialog 
+                open={openAddModal} 
+                onClose={() => setOpenAddModal(false)} 
+                maxWidth="sm" 
+                fullWidth 
+                PaperProps={{ 
+                    sx: { 
+                        borderRadius: 3,
+                        boxShadow: '0 24px 48px -12px rgba(0, 0, 0, 0.18)',
+                        overflow: 'visible'
+                    } 
+                }}
+            >
+                <DialogTitle sx={{ p: 3, pb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{ p: 1, bgcolor: '#f1f5f9', borderRadius: 2, color: 'primary.main', display: 'flex' }}>
+                            <UserPlus size={24} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>
+                                Add New Employee
                             </Typography>
+                            <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+                                Employee ID and Secure Password will be auto-generated.
+                            </Typography>
+                        </Box>
+                    </Box>
+                </DialogTitle>
+                
+                <DialogContent sx={{ p: 3, pt: 1 }}>
+                    <Grid container spacing={2.5}>
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1 }}>Full Name *</Typography>
+                            <TextField 
+                                fullWidth 
+                                size="small"
+                                placeholder="e.g. Rahul Sharma" 
+                                value={formData.full_name} 
+                                onChange={(e) => setFormData({...formData, full_name: e.target.value})} 
+                            />
                         </Grid>
                         <Grid item xs={12}>
-                            <TextField fullWidth label="Full Name" required value={formData.full_name} onChange={(e) => setFormData({...formData, full_name: e.target.value})} InputProps={{ sx: { borderRadius: 3 } }}/>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField fullWidth label="Corporate Email Address" type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} InputProps={{ sx: { borderRadius: 3 } }}/>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField fullWidth label="Phone Number" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} InputProps={{ sx: { borderRadius: 3 } }}/>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1 }}>Corporate Email Address *</Typography>
+                            <TextField 
+                                fullWidth 
+                                size="small"
+                                type="email" 
+                                placeholder="name@vedaloans.com" 
+                                value={formData.email} 
+                                onChange={(e) => setFormData({...formData, email: e.target.value})} 
+                            />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField select fullWidth label="System Role" required value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} InputProps={{ sx: { borderRadius: 3 } }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1 }}>System Role *</Typography>
+                            <TextField 
+                                select 
+                                fullWidth 
+                                size="small"
+                                value={formData.role} 
+                                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                            >
                                 <MenuItem value="Admin">Admin</MenuItem>
-                                <MenuItem value="Loan Manager">Loan Manager</MenuItem>
-                                <MenuItem value="Telecaller">Telecaller</MenuItem>
-                                <MenuItem value="JV Overseas">JV Overseas</MenuItem>
-                                <MenuItem value="DSA Agent">DSA Agent</MenuItem>
+                                <MenuItem value="Normal Employee">Normal Employee</MenuItem>
                             </TextField>
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField select fullWidth label="Department" required value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} InputProps={{ sx: { borderRadius: 3 } }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1 }}>Department *</Typography>
+                            <TextField 
+                                select 
+                                fullWidth 
+                                size="small"
+                                value={formData.department} 
+                                onChange={(e) => setFormData({...formData, department: e.target.value})}
+                            >
                                 <MenuItem value="Sales">Sales</MenuItem>
                                 <MenuItem value="Operations">Operations</MenuItem>
                                 <MenuItem value="Credit">Credit</MenuItem>
                                 <MenuItem value="Management">Management</MenuItem>
+                                <MenuItem value="Support">Support</MenuItem>
                             </TextField>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#334155', mb: 1 }}>Phone Number (Optional)</Typography>
+                            <TextField 
+                                fullWidth 
+                                size="small"
+                                placeholder="+91 98765 43210" 
+                                value={formData.phone} 
+                                onChange={(e) => setFormData({...formData, phone: e.target.value})} 
+                            />
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions sx={{ p: 3 }}>
-                    <Button onClick={() => setOpenAddModal(false)} sx={{ fontWeight: 800, color: 'text.secondary' }}>Cancel</Button>
-                    <Button variant="contained" onClick={handleCreateEmployee} disabled={isSubmitting || !formData.full_name || !formData.email} sx={{ px: 4, borderRadius: 2, fontWeight: 800 }}>
-                        {isSubmitting ? <CircularProgress size={24} /> : 'Generate Secure Link'}
+                
+                <DialogActions sx={{ px: 3, py: 2.5, bgcolor: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottomLeftRadius: 12, borderBottomRightRadius: 12 }}>
+                    <Button 
+                        onClick={() => setOpenAddModal(false)} 
+                        sx={{ fontWeight: 700, color: '#64748b', '&:hover': { bgcolor: '#e2e8f0' } }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        variant="contained" 
+                        onClick={handleCreateEmployee} 
+                        disabled={isSubmitting || !formData.full_name || !formData.email} 
+                        sx={{ px: 3, py: 1, borderRadius: 2, fontWeight: 700, ml: 2, boxShadow: 'none', '&:hover': { boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)' } }}
+                    >
+                        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Add & Generate Credentials'}
                     </Button>
                 </DialogActions>
             </Dialog>
