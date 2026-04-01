@@ -34,6 +34,7 @@ import {
     DollarSign, 
     History, 
     MessageSquare, 
+    MessageSquareDiff,
     CheckCircle2, 
     Clock, 
     AlertCircle,
