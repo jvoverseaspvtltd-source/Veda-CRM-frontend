@@ -107,7 +107,7 @@ const Forms = () => {
                          Online Submissions
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                        Incoming enquiries and raw leads captured from the [vedaloans.com](https://vedaloans.com) website.
+                        Incoming enquiries and raw leads captured from the [vedaloansandfinance.com](https://vedaloansandfinance.com) website.
                     </Typography>
                 </Box>
                 <Button 

@@ -106,7 +106,7 @@ const PublicForm = () => {
                     </Box>
                     <Typography variant="h4" sx={{ fontWeight: 900, mb: 1 }}>Success!</Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>Your application and documents have been submitted. Our team will verify them shortly.</Typography>
-                    <Button variant="contained" fullWidth onClick={() => window.location.href = 'https://vedaloans.com'} sx={{ py: 1.5, borderRadius: 4, fontWeight: 800 }}>Back to Website</Button>
+                    <Button variant="contained" fullWidth onClick={() => window.location.href = 'https://vedaloansandfinance.com'} sx={{ py: 1.5, borderRadius: 4, fontWeight: 800 }}>Back to Website</Button>
                 </Paper>
             </Box>
         );

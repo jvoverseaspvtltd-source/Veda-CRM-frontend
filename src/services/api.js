@@ -56,6 +56,35 @@ api.interceptors.response.use(
     }
 );
 
+// Advanced Help Desk Service
+export const helpdeskService = {
+    getTickets: async (filters = {}) => {
+        const query = new URLSearchParams(filters).toString();
+        const response = await api.get(`/helpdesk/tickets?${query}`);
+        return response.data;
+    },
+    getTicketDetails: async (ticketId) => {
+        const response = await api.get(`/helpdesk/tickets/${ticketId}`);
+        return response.data;
+    },
+    createTicket: async (ticketData) => {
+        const response = await api.post('/helpdesk/tickets', ticketData);
+        return response.data;
+    },
+    updateTicket: async (ticketId, updateData) => {
+        const response = await api.patch(`/helpdesk/tickets/${ticketId}`, updateData);
+        return response.data;
+    },
+    getMessages: async (ticketId) => {
+        const response = await api.get(`/helpdesk/tickets/${ticketId}/messages`);
+        return response.data;
+    },
+    sendMessage: async (ticketId, messageData) => {
+        const response = await api.post(`/helpdesk/tickets/${ticketId}/messages`, messageData);
+        return response.data;
+    }
+};
+
 // Auth Services
 export const authService = {
     login: async (email, password) => {
