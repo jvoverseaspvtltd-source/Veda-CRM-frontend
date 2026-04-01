@@ -556,7 +556,6 @@ const CreditPartners = () => {
     const handleOpenModal = (mode, partner = null) => {
         setModalMode(mode);
         setFormError(null);
-        setShowPassword(false);
         if (partner) {
             setFormData({ 
                 ...partner, 
