@@ -71,8 +71,8 @@ const CredentialsPDF = ({ data }) => (
 // Main Component
 // =======================================================
 const Employees = () => {
-    const { user } = useAuth();
-    const isAdmin = ['Super Admin', 'Admin'].includes(user?.role);
+    const { user, profile } = useAuth();
+    const isAdmin = ['Super Admin', 'Admin'].includes(profile?.role);
 
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -152,6 +152,18 @@ const Employees = () => {
         (emp.full_name?.toLowerCase().includes(search.toLowerCase()) || emp.emp_id?.toLowerCase().includes(search.toLowerCase()))
     );
 
+    // Helper to extract nested department strings
+    const parseDepartment = (deptData) => {
+        if (!deptData) return 'General';
+        if (typeof deptData === 'object') return deptData.dept || 'General';
+        if (typeof deptData === 'string' && deptData.startsWith('{')) {
+            try {
+                return JSON.parse(deptData).dept || 'General';
+            } catch (e) {}
+        }
+        return deptData;
+    };
+
     return (
         <Box sx={{ p: { xs: 2, md: 4 } }}>
             {/* Header */}
@@ -171,7 +183,7 @@ const Employees = () => {
                         onClick={() => setOpenAddModal(true)}
                         sx={{ borderRadius: 2, px: 3, py: 1.5, fontWeight: 800, boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}
                     >
-                        New Employee
+                        + Add Employee
                     </Button>
                 )}
             </Box>
@@ -180,7 +192,7 @@ const Employees = () => {
             {isAdmin && (
                 <Paper sx={{ p: 2, mb: 3, borderRadius: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
                     <TextField 
-                        placeholder="Search by ID or Name..." 
+                        placeholder="Search by ID, Name or Role..." 
                         size="small" 
                         value={search} 
                         onChange={e => setSearch(e.target.value)} 
@@ -190,16 +202,19 @@ const Employees = () => {
             )}
 
             {/* Employee Table */}
-            <TableContainer component={Paper} sx={{ borderRadius: 4, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+            <TableContainer component={Paper} sx={{ borderRadius: 4, overflow: 'auto', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
                 {loading ? (
                     <Box sx={{ p: 5, textAlign: 'center' }}><CircularProgress /></Box>
                 ) : (
-                    <Table>
+                    <Table sx={{ minWidth: 900 }}>
                         <TableHead sx={{ bgcolor: '#f8fafc' }}>
                             <TableRow>
-                                <TableCell sx={{ fontWeight: 800 }}>Employee details</TableCell>
-                                <TableCell sx={{ fontWeight: 800 }}>Role / Dept</TableCell>
+                                <TableCell sx={{ fontWeight: 800, whiteSpace: 'nowrap' }}>Employee ID</TableCell>
+                                <TableCell sx={{ fontWeight: 800 }}>Full Name</TableCell>
+                                <TableCell sx={{ fontWeight: 800 }}>Role & Dept</TableCell>
                                 <TableCell sx={{ fontWeight: 800 }}>Contact Info</TableCell>
+                                <TableCell sx={{ fontWeight: 800 }}>Created Date</TableCell>
+                                <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
                                 {isAdmin && <TableCell sx={{ fontWeight: 800 }} align="right">Actions</TableCell>}
                             </TableRow>
                         </TableHead>
@@ -207,34 +222,49 @@ const Employees = () => {
                             {filteredEmployees.map((emp) => (
                                 <TableRow key={emp.id} hover>
                                     <TableCell>
+                                        <Chip label={emp.emp_id || 'LEGACY'} size="small" sx={{ fontWeight: 800, color: 'primary.main', bgcolor: '#f1f5f9' }} />
+                                    </TableCell>
+                                    <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Avatar sx={{ bgcolor: 'white', color: 'primary.main', border: '1px solid currentColor', fontWeight: 800 }}>
-                                                {emp.full_name?.charAt(0) || <User />}
+                                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', color: 'white', fontWeight: 800, fontSize: '0.875rem' }}>
+                                                {emp.full_name?.charAt(0) || <User size={16} />}
                                             </Avatar>
-                                            <Box>
-                                                <Typography variant="body1" sx={{ fontWeight: 700 }}>{emp.full_name}</Typography>
-                                                <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', bgcolor: '#f1f5f9', px: 1, py: 0.2, borderRadius: 1 }}>
-                                                    {emp.emp_id || 'LEGACY-USER'}
-                                                </Typography>
-                                            </Box>
+                                            <Typography variant="body2" sx={{ fontWeight: 700 }}>{emp.full_name}</Typography>
                                         </Box>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>{emp.role}</Typography>
-                                        <Chip label={emp.department || 'General'} size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: '0.65rem', height: 20 }} />
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                            <Chip label={emp.role} size="small" sx={{ fontWeight: 700, bgcolor: emp.role?.includes('Admin') ? 'error.light' : 'primary.light', color: emp.role?.includes('Admin') ? 'error.dark' : 'primary.dark' }} />
+                                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{parseDepartment(emp.department)}</Typography>
+                                        </Box>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                            <Mail size={14} /> {emp.email || 'N/A'}
+                                        <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, fontWeight: 600 }}>
+                                            <Mail size={12} /> {emp.email || 'N/A'}
                                         </Typography>
+                                        {emp.phone && (
+                                            <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+                                                N/A
+                                            </Typography>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                            {emp.created_at ? new Date(emp.created_at).toLocaleDateString() : 'Unknown'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip label="Active" size="small" color="success" variant="outlined" sx={{ fontWeight: 700, fontSize: '0.65rem', height: 20 }} />
                                     </TableCell>
                                     {isAdmin && (
                                         <TableCell align="right">
-                                            {emp.role !== 'Super Admin' && (
-                                                <Tooltip title="Remove User">
-                                                    <IconButton size="small" color="error" onClick={() => handleDelete(emp.id)}><Trash2 size={18} /></IconButton>
-                                                </Tooltip>
-                                            )}
+                                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                                                {emp.role !== 'Super Admin' && (
+                                                    <Tooltip title="Revoke Access (Delete)">
+                                                        <IconButton size="small" color="error" onClick={() => handleDelete(emp.id)}><Trash2 size={16} /></IconButton>
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
                                         </TableCell>
                                     )}
                                 </TableRow>
