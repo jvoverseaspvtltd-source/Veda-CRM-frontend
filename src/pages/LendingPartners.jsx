@@ -1,3 +1,33 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Typography,
+    Paper,
+    Chip,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    MenuItem,
+    Alert,
+    CircularProgress,
+    Tooltip,
+    Grid,
+    Stack,
+    Avatar,
+    alpha,
+    useTheme,
+    InputAdornment,
+    Divider,
+    Tab,
+    Tabs,
+    Table,
+    TableBody,
     TableCell,
     TableContainer,
     TableHead,
@@ -167,8 +197,6 @@ const CredentialsPDF = ({ creds }) => (
         </Page>
     </Document>
 );
-import { lendingPartnerService, bankService } from '../services/api';
-import { useNavigate } from 'react-router-dom';
 
 // ─── Status Chip ─────────────────────────────────────────────────────────────
 const StatusChip = ({ status }) => (
