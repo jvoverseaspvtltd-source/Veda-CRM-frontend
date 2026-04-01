@@ -337,7 +337,7 @@ const ZipViewer = ({ transactionId, open, onClose, onUpdate }) => {
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth
-            PaperProps={{ sx={{ borderRadius: 4, maxHeight: '90vh' } }}
+            PaperProps={{ sx: { borderRadius: 4, maxHeight: '90vh' } }}
         >
             <DialogTitle sx={{ pb: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
