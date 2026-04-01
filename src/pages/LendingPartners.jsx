@@ -587,6 +587,24 @@ const CreditPartners = () => {
             setFormError('Name, Bank and Email are required.');
             return;
         }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setFormError('Please enter a valid email address.');
+            return;
+        }
+
+        // Validate phone number (optional but if provided, must be valid)
+        if (formData.phone) {
+            const cleanPhone = formData.phone.replace(/\s/g, '');
+            const phoneRegex = /^[\+]?[0-9\-]{10,15}$/;
+            if (!phoneRegex.test(cleanPhone)) {
+                setFormError('Please enter a valid phone number (10-15 digits, optional + prefix).');
+                return;
+            }
+        }
+
         try {
             setSaving(true);
             setFormError(null);
