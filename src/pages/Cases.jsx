@@ -57,18 +57,19 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const caseStages = [
-    'Lead Created',
+    'New Application',
     'Documents Collected',
-    'CIBIL Checked',
-    'Bank Applied',
-    'Sanction Letter Received',
-    'Disbursement Done',
-    'Commission Received',
+    'Under Review',
+    'Applied to NBFC',
+    'Approved',
+    'Disbursed',
 ];
 
 const STATUS_COLORS = {
-    'New': { bg: '#e0f2fe', color: '#0369a1' },
-    'Under Process': { bg: '#fef3c7', color: '#b45309' },
+    'New Application': { bg: '#e0f2fe', color: '#0369a1' },
+    'Documents Collected': { bg: '#f3e8ff', color: '#7c3aed' },
+    'Under Review': { bg: '#fef3c7', color: '#b45309' },
+    'Applied to NBFC': { bg: '#dbeafe', color: '#1d4ed8' },
     'Approved': { bg: '#dcfce7', color: '#15803d' },
     'Rejected': { bg: '#fee2e2', color: '#dc2626' },
     'Disbursed': { bg: '#dcfce7', color: '#15803d' },

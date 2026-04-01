@@ -10,7 +10,7 @@ import {
 import {
     Search, Eye, RefreshCw, CheckCircle2, Clock, X,
     AlertCircle, FileText, Building2, Phone, Mail,
-    DollarSign, Calendar, Share2, User, MapPin
+    DollarSign, Calendar, Share2, User, MapPin, Download, FileArchive
 } from 'lucide-react';
 import { usePartnerAuth } from '../../context/PartnerAuthContext';
 import { applicationService } from '../../services/api';
@@ -111,22 +111,22 @@ const MyTasks = () => {
         setOpenDetailsDialog(false);
     };
 
-    const handleUpdateStatus = async () => {
-        if (!newStatus || !selectedTask) return;
-
-        setUpdating(true);
+    const handleDownloadZip = async (taskId) => {
         try {
-            await applicationService.update(selectedTask.id, {
-                status: newStatus,
-                partner_notes: statusNotes
-            });
-            showSnackbar('Status updated successfully!');
-            setOpenStatusDialog(false);
-            fetchTasks();
+            const data = await applicationService.getById(taskId);
+            const zipDocs = data.documents?.filter(d => d.file_type === 'student_docs' || d.file_name.endsWith('.zip'));
+            if (!zipDocs || zipDocs.length === 0) {
+                showSnackbar('No ZIP document found for this application', 'warning');
+                return;
+            }
+            // Logic to download (e.g. window.open or blob stream)
+            // Assuming the system uses a shared storage or signed URL
+            const doc = zipDocs[0];
+            showSnackbar(`Starting download: ${doc.file_name}`);
+            // In a real implementation, this would be a protected link or stream
+            window.open(`${import.meta.env.VITE_API_URL}/applications/documents/${doc.id}/download`, '_blank');
         } catch (err) {
-            showSnackbar('Failed to update status', 'error');
-        } finally {
-            setUpdating(false);
+            showSnackbar('Failed to fetch document info', 'error');
         }
     };
 
@@ -305,6 +305,11 @@ const MyTasks = () => {
                                             <Tooltip title="View Details">
                                                 <IconButton size="small" color="primary" onClick={() => handleOpenDetails(t)}>
                                                     <Eye size={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Download Documents (ZIP)">
+                                                <IconButton size="small" sx={{ bgcolor: alpha('#6366f1', 0.1), color: '#6366f1' }} onClick={() => handleDownloadZip(t.id)}>
+                                                    <Download size={18} />
                                                 </IconButton>
                                             </Tooltip>
                                             <Tooltip title="Update Status">

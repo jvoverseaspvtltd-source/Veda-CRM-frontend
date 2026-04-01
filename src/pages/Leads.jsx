@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Box,
     Typography,
     Button,
     Paper,
-    Card,
     Table,
     TableBody,
     TableCell,
@@ -32,26 +31,40 @@ import {
     useTheme,
     Avatar,
     Tooltip,
-    Snackbar
+    Snackbar,
+    Divider
 } from '@mui/material';
-import { Plus, Search, Filter, Eye, Edit2, Trash2, X, ExternalLink, Activity, Info, LayoutGrid, List as ListIcon, Phone, Mail, MapPin, Briefcase, CreditCard, User, Clock, CheckCircle2, Send, Link as LinkIcon, Users, ArrowUpDown, ClipboardList, ShieldCheck } from 'lucide-react';
+import { 
+    Plus, Search, Filter, Eye, Edit2, Trash2, X, ExternalLink, 
+    Activity, Info, List as ListIcon, Phone, Mail, MapPin, 
+    Briefcase, CreditCard, User, Clock, CheckCircle2, Send, 
+    Link as LinkIcon, Users, ArrowUpDown, ClipboardList, 
+    ShieldCheck, Share2, Upload, FileArchive, Building2, Calendar
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { leadService } from '../services/api';
+import { applicationService, lendingPartnerService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-const leadSources = ['JV Overseas', 'Direct Walk-in', 'Website', 'DSA Agent'];
 const loanTypes = ['Education Loan', 'Personal Loan', 'Business Loan', 'Home Loan'];
-const stages = ['New', 'Contacted', 'Interested', 'In Progress', 'Sanctioned', 'Disbursed', 'Rejected'];
+const statusStages = [
+    'New Application', 
+    'Documents Collected', 
+    'Under Review', 
+    'Applied to NBFC', 
+    'Approved', 
+    'Disbursed', 
+    'Rejected'
+];
 
 const getStatusColor = (status) => {
     switch (status) {
-        case 'New': return 'info';
-        case 'Contacted': return 'secondary';
-        case 'Interested': return 'primary';
-        case 'In Progress': return 'warning';
-        case 'Sanctioned': return 'success';
-        case 'Rejected': return 'error';
+        case 'New Application': return 'info';
+        case 'Documents Collected': return 'secondary';
+        case 'Under Review': return 'warning';
+        case 'Applied to NBFC': return 'primary';
+        case 'Approved': return 'success';
         case 'Disbursed': return 'success';
+        case 'Rejected': return 'error';
         default: return 'default';
     }
 };
@@ -60,76 +73,66 @@ const Leads = () => {
     const theme = useTheme();
     const navigate = useNavigate();
     const { profile } = useAuth();
-    const [leads, setLeads] = useState([]);
+    const fileInputRef = useRef();
+
+    // Data States
+    const [applications, setApplications] = useState([]);
+    const [partners, setPartners] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
-    const [open, setOpen] = useState(false);
+    
+    // UI States
     const [searchTerm, setSearchTerm] = useState('');
-
+    const [filterOpen, setFilterOpen] = useState(false);
+    const [createOpen, setCreateOpen] = useState(false);
     const [viewOpen, setViewOpen] = useState(false);
-    const [editOpen, setEditOpen] = useState(false);
-    const [selectedLead, setSelectedLead] = useState(null);
+    const [shareOpen, setShareOpen] = useState(false);
+    const [processOpen, setProcessOpen] = useState(false);
+    
+    const [selectedApp, setSelectedApp] = useState(null);
+    const [selectedPartner, setSelectedPartner] = useState('');
+    const [filters, setFilters] = useState({ status: '', loan_type: '' });
+    const [zipFile, setZipFile] = useState(null);
 
-    // Form State
+    // Form States
     const [formData, setFormData] = useState({
-        name: '',
-        mobile: '',
+        applicant_name: '',
+        phone: '',
         email: '',
+        uid: '',
         city: '',
-        source: 'Website',
+        state: '',
         loan_type: 'Education Loan',
         loan_amount: '',
-        assigned_to: '',
-        details: {}
+        notes: ''
     });
 
-    const handleViewLead = (lead) => {
-        setSelectedLead(lead);
-        setViewOpen(true);
-    };
-
-    const handleEditLead = (lead) => {
-        setSelectedLead(lead);
-        setFormData({
-            ...lead,
-            mobile: lead.mobile || '',
-            email: lead.email || '',
-            city: lead.city || '',
-            loan_amount: lead.loan_amount || ''
-        });
-        setEditOpen(true);
-    };
-
-    const handleUpdateStatus = async (id, status) => {
-        try {
-            await leadService.updateLead(id, { status });
-            fetchLeads();
-        } catch (err) {
-            console.error('Update logic error:', err);
-        }
-    };
-
-    const [filterOpen, setFilterOpen] = useState(false);
-    const [filters, setFilters] = useState({
-        source: '',
-        loan_type: '',
-        status: ''
+    const [processData, setProcessData] = useState({
+        nbfc_name: '',
+        branch_name: '',
+        application_date: new Date().toISOString().split('T')[0],
+        status: 'Applied to NBFC',
+        approved_amount: '',
+        rejection_reason: ''
     });
 
     useEffect(() => {
-        fetchLeads();
-    }, [profile]);
+        fetchInitialData();
+    }, []);
 
-    const fetchLeads = async () => {
+    const fetchInitialData = async () => {
         try {
             setLoading(true);
-            const data = await leadService.getAllLeads(profile?.id, profile?.role);
-            setLeads(data);
-            setError(null);
+            const [appsData, partnersData] = await Promise.all([
+                applicationService.getAll(),
+                lendingPartnerService.getAll()
+            ]);
+            setApplications(appsData || []);
+            setPartners(partnersData || []);
         } catch (err) {
             console.error('Fetch error:', err);
-            setError('Failed to fetch leads. Showing local data for now.');
-            // Fallback to empty or mock if needed for dev
+            setError('Failed to load application data.');
         } finally {
             setLoading(false);
         }
@@ -140,35 +143,88 @@ const Leads = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async () => {
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file && !file.name.endsWith('.zip')) {
+            alert('Please upload a ZIP file only.');
+            return;
+        }
+        setZipFile(file);
+    };
+
+    const handleCreateSubmit = async () => {
+        if (!formData.applicant_name || !formData.phone) {
+            alert('Name and Phone are mandatory.');
+            return;
+        }
+
         try {
-            await leadService.createLead({ ...formData, userId: profile?.id });
-            setOpen(false);
-            fetchLeads(); // Refresh list
-            setFormData({ name: '', mobile: '', email: '', city: '', source: 'Website', loan_type: 'Education Loan', loan_amount: '', details: {} });
+            setSubmitting(true);
+            // 1. Create Application
+            const app = await applicationService.create(formData);
+            
+            // 2. Upload ZIP if exists
+            if (zipFile && app.id) {
+                const uploadData = new FormData();
+                uploadData.append('file', zipFile);
+                uploadData.append('applicationId', app.id);
+                uploadData.append('type', 'student_docs');
+                await applicationService.uploadDocument(uploadData);
+            }
+
+            setCreateOpen(false);
+            setZipFile(null);
+            fetchInitialData();
+            setFormData({ applicant_name: '', phone: '', email: '', uid: '', city: '', state: '', loan_type: 'Education Loan', loan_amount: '', notes: '' });
         } catch (err) {
-            console.error('Submit error:', err);
-            alert('Failed to save lead');
+            alert(err.response?.data?.error || 'Failed to save application');
+        } finally {
+            setSubmitting(false);
         }
     };
 
-    const filteredLeads = leads.filter(lead => {
+    const handleShareSubmit = async () => {
+        if (!selectedPartner) return;
+        try {
+            setSubmitting(true);
+            await applicationService.shareWithPartner(selectedApp.id, selectedPartner);
+            setShareOpen(false);
+            fetchInitialData();
+        } catch (err) {
+            alert('Failed to share application');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleProcessSubmit = async () => {
+        try {
+            setSubmitting(true);
+            await applicationService.update(selectedApp.id, processData);
+            setProcessOpen(false);
+            fetchInitialData();
+        } catch (err) {
+            alert('Failed to update process status');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const filteredApps = applications.filter(app => {
         const matchesSearch = 
-            lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.mobile.includes(searchTerm) ||
-            lead.email?.toLowerCase().includes(searchTerm.toLowerCase());
+            app.applicant_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.uid?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            app.phone?.includes(searchTerm);
         
-        const matchesSource = !filters.source || lead.source === filters.source;
-        const matchesType = !filters.loan_type || lead.loan_type === filters.loan_type;
-        const matchesStatus = !filters.status || lead.status === filters.status;
+        const matchesType = !filters.loan_type || app.loan_type === filters.loan_type;
+        const matchesStatus = !filters.status || app.status === filters.status;
 
-        return matchesSearch && matchesSource && matchesType && matchesStatus;
+        return matchesSearch && matchesType && matchesStatus;
     });
-
-    const clearFilters = () => setFilters({ source: '', loan_type: '', status: '' });
 
     return (
         <Box>
+            {/* Header Section */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 5 }}>
                 <Box>
                     <Typography variant="h3" sx={{ 
@@ -183,36 +239,36 @@ const Leads = () => {
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Activity size={18} color="#3B82F6" />
-                        Central hub for tracking active loan files and document collection.
+                        Manage student applications, ZIP documents, and credit partner assignments.
                     </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button
                         variant="soft"
-                        startIcon={<ClipboardList size={20} />}
-                        onClick={() => navigate('/apply')}
-                        sx={{ px: 4, py: 1.5, borderRadius: 4, fontWeight: 800, textTransform: 'none', bgcolor: alpha('#6366f1', 0.1), color: '#6366f1' }}
+                        startIcon={<Trash2 size={20} />}
+                        onClick={() => navigate('/trash')}
+                        sx={{ px: 3, py: 1.5, borderRadius: 4, fontWeight: 800, color: '#dc2626', bgcolor: alpha('#dc2626', 0.1) }}
                     >
-                        Fill Application
+                        View Trash
                     </Button>
-
                     <Button
                         variant="contained"
                         startIcon={<Plus size={20} />}
-                        onClick={() => setOpen(true)}
-                        sx={{ px: 4, py: 1.5, borderRadius: 4, fontWeight: 800, textTransform: 'none', boxShadow: '0 8px 24px rgba(26, 54, 93, 0.2)' }}
+                        onClick={() => setCreateOpen(true)}
+                        sx={{ px: 4, py: 1.5, borderRadius: 4, fontWeight: 800, boxShadow: '0 8px 24px rgba(26, 54, 93, 0.2)' }}
                     >
-                        New Application
+                        New Registry
                     </Button>
                 </Box>
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 2, mb: 5 }}>
-                <Paper sx={{ p: '4px 12px', display: 'flex', alignItems: 'center', width: 450, borderRadius: 4, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
-                    <Search size={20} color={theme.palette.text.secondary} />
+            {/* Search & Filters */}
+            <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+                <Paper sx={{ p: '6px 16px', display: 'flex', alignItems: 'center', width: 500, borderRadius: 4, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
+                    <Search size={20} color="#64748b" />
                     <TextField
                         fullWidth
-                        placeholder="Search by name, contact or loan type..."
+                        placeholder="Search by student name, contact or UNID..."
                         variant="standard"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -225,65 +281,105 @@ const Leads = () => {
                     onClick={() => setFilterOpen(true)}
                     sx={{ borderRadius: 4, px: 3, fontWeight: 700, borderColor: '#e2e8f0', color: 'text.primary' }}
                 >
-                    Filters {Object.values(filters).some(v => v !== '') && `(${Object.values(filters).filter(v => v !== '').length})`}
+                    Filters
                 </Button>
             </Box>
 
-            {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>{error}</Alert>}
-
+            {/* Main Application Table */}
             <TableContainer component={Paper} sx={{ borderRadius: 5, overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.04)', border: '1px solid #f1f5f9' }}>
                 <Table>
                     <TableHead sx={{ bgcolor: '#f8fafc' }}>
                         <TableRow>
-                            <TableCell sx={{ fontWeight: 800, py: 2 }}>Customer Details</TableCell>
-                            <TableCell sx={{ fontWeight: 800 }}>Loan Profile</TableCell>
-                            <TableCell sx={{ fontWeight: 800 }}>Source</TableCell>
-                            <TableCell sx={{ fontWeight: 800 }}>Fulfillment Stage</TableCell>
+                            <TableCell sx={{ fontWeight: 800, py: 2 }}>Student / Applicant</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Unique ID (UNID)</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Loan Type</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
+                            <TableCell sx={{ fontWeight: 800 }}>Partner Info</TableCell>
                             <TableCell sx={{ fontWeight: 800 }} align="right">Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {loading ? (
-                            <TableRow><TableCell colSpan={5} align="center" sx={{ py: 10 }}><CircularProgress /></TableCell></TableRow>
-                        ) : leads.length === 0 ? (
-                            <TableRow><TableCell colSpan={5} align="center" sx={{ py: 10 }}><Typography color="text.secondary">No records found</Typography></TableCell></TableRow>
+                            <TableRow><TableCell colSpan={6} align="center" sx={{ py: 10 }}><CircularProgress /></TableCell></TableRow>
+                        ) : filteredApps.length === 0 ? (
+                            <TableRow><TableCell colSpan={6} align="center" sx={{ py: 10 }}><Typography color="text.secondary">No records found</Typography></TableCell></TableRow>
                         ) : (
-                            filteredLeads.map((lead) => (
-                                <TableRow key={lead.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            filteredApps.map((app) => (
+                                <TableRow key={app.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                            <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.08), color: 'primary.main', fontWeight: 800, width: 44, height: 44 }}>{lead.name.charAt(0)}</Avatar>
+                                            <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.08), color: 'primary.main', fontWeight: 800 }}>{app.applicant_name?.charAt(0)}</Avatar>
                                             <Box>
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{lead.name}</Typography>
-                                                <Typography variant="caption" color="text.secondary">{lead.email || lead.mobile}</Typography>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{app.applicant_name}</Typography>
+                                                <Typography variant="caption" color="text.secondary">{app.phone}</Typography>
                                             </Box>
                                         </Box>
                                     </TableCell>
                                     <TableCell>
-                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>₹{lead.loan_amount || '0'}</Typography>
-                                        <Typography variant="caption" color="text.secondary">{lead.loan_type}</Typography>
+                                        <Chip label={app.uid} size="small" variant="soft" color="primary" sx={{ fontWeight: 800, borderRadius: 1.5 }} />
                                     </TableCell>
                                     <TableCell>
-                                        <Chip label={lead.source} size="small" variant="outlined" sx={{ fontWeight: 700, borderRadius: 1.5, fontSize: '0.75rem' }} />
+                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>₹{(app.loan_amount || 0).toLocaleString()}</Typography>
+                                        <Typography variant="caption" color="text.secondary">{app.loan_type}</Typography>
                                     </TableCell>
                                     <TableCell>
                                         <Chip 
-                                            label={lead.status} 
-                                            color={getStatusColor(lead.status)} 
+                                            label={app.status || 'New'} 
+                                            color={getStatusColor(app.status)} 
                                             size="small" 
                                             sx={{ fontWeight: 900, borderRadius: 2, px: 1, textTransform: 'uppercase', fontSize: '0.65rem' }} 
                                         />
                                     </TableCell>
-                                    <TableCell align="right">                                     <Tooltip title="View Lead Details">
-                                         <IconButton size="small" onClick={() => handleViewLead(lead)}><Eye size={18} /></IconButton>
-                                     </Tooltip>
-                                     <Tooltip title="Edit Lead">
-                                         <IconButton size="small" onClick={() => handleEditLead(lead)}><Edit2 size={18} /></IconButton>
-                                     </Tooltip>
-                                     <Tooltip title="Case Log">
-                                         <IconButton size="small" color="primary" onClick={() => navigate(`/cases/lead/${lead.id}`)} sx={{ bgcolor: alpha(theme.palette.primary.main, 0.05) }}><ExternalLink size={18} /></IconButton>
-                                     </Tooltip>
-                                 </TableCell>
+                                    <TableCell>
+                                        {app.shared_with_name ? (
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <ShieldCheck size={14} color="#10b981" />
+                                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#059669' }}>{app.shared_with_name}</Typography>
+                                            </Box>
+                                        ) : (
+                                            <Typography variant="caption" color="text.secondary">Not Shared</Typography>
+                                        )}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                                            <Tooltip title="View History">
+                                                <IconButton size="small" onClick={() => { setSelectedApp(app); setViewOpen(true); }}><Eye size={18} /></IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Process Application">
+                                                <IconButton 
+                                                    size="small" 
+                                                    color="primary" 
+                                                    onClick={() => { 
+                                                        setSelectedApp(app); 
+                                                        setProcessData({
+                                                            nbfc_name: app.nbfc_name || '',
+                                                            branch_name: app.branch_name || '',
+                                                            application_date: app.application_date ? new Date(app.application_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                                                            status: app.status || 'Applied to NBFC',
+                                                            approved_amount: app.approved_amount || '',
+                                                            rejection_reason: app.rejection_reason || ''
+                                                        });
+                                                        setProcessOpen(true); 
+                                                    }}
+                                                >
+                                                    <Building2 size={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Share with Partner">
+                                                <IconButton 
+                                                    size="small" 
+                                                    color="success" 
+                                                    onClick={() => { setSelectedApp(app); setShareOpen(true); }}
+                                                    sx={{ bgcolor: alpha('#10b981', 0.1) }}
+                                                >
+                                                    <Share2 size={18} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title="Delete">
+                                                <IconButton size="small" color="error"><Trash2 size={18} /></IconButton>
+                                            </Tooltip>
+                                        </Stack>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         )}
@@ -291,265 +387,130 @@ const Leads = () => {
                 </Table>
             </TableContainer>
 
+            {/* --- Modals & Dialogs --- */}
 
-            <Drawer
-                anchor="right"
-                open={filterOpen}
-                onClose={() => setFilterOpen(false)}
-                PaperProps={{ sx: { width: 320, p: 3 } }}
-            >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Advanced Filters</Typography>
-                    <IconButton onClick={() => setFilterOpen(false)}><X size={20} /></IconButton>
-                </Box>
-
-                <Stack spacing={3}>
-                    <FormControl fullWidth>
-                        <InputLabel>Lead Source</InputLabel>
-                        <Select
-                            value={filters.source}
-                            label="Lead Source"
-                            onChange={(e) => setFilters({ ...filters, source: e.target.value })}
-                        >
-                            <MenuItem value="">All Sources</MenuItem>
-                            {leadSources.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                        </Select>
-                    </FormControl>
-
-                    <FormControl fullWidth>
-                        <InputLabel>Loan Type</InputLabel>
-                        <Select
-                            value={filters.loan_type}
-                            label="Loan Type"
-                            onChange={(e) => setFilters({ ...filters, loan_type: e.target.value })}
-                        >
-                            <MenuItem value="">All Types</MenuItem>
-                            {loanTypes.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-                        </Select>
-                    </FormControl>
-
-                    <FormControl fullWidth>
-                        <InputLabel>Status</InputLabel>
-                        <Select
-                            value={filters.status}
-                            label="Status"
-                            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                        >
-                            <MenuItem value="">All Statuses</MenuItem>
-                            {['New', 'Contacted', 'Interested', 'Sanctioned', 'Rejected', 'Disbursed'].map(s => 
-                                <MenuItem key={s} value={s}>{s}</MenuItem>
-                            )}
-                        </Select>
-                    </FormControl>
-
-                    <Button variant="outlined" onClick={clearFilters} color="inherit" sx={{ mt: 2 }}>
-                        Clear All Filters
-                    </Button>
-                </Stack>
-            </Drawer>
-
-            {/* View Application Dialog */}
-            <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="sm" fullWidth>
-                {selectedLead && (
-                    <>
-                        <DialogTitle sx={{ p: 0, m: 0 }}>
-                            <Box sx={{ p: 3, pt: 4, background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', position: 'relative', overflow: 'hidden' }}>
-                                <Box sx={{ position: 'absolute', top: -50, right: -50, width: 150, height: 150, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, rgba(0,0,0,0) 70%)' }} />
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
-                                    <Avatar sx={{ width: 80, height: 80, bgcolor: '#3B82F6', fontSize: '2rem', fontWeight: 900, border: '4px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-                                        {selectedLead.name?.charAt(0) || 'U'}
-                                    </Avatar>
-                                    <Box>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                                            <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', letterSpacing: -1 }}>{selectedLead.name}</Typography>
-                                            <Chip label={selectedLead.status} color={getStatusColor(selectedLead.status)} size="small" sx={{ fontWeight: 800, border: '1px solid rgba(255,255,255,0.2)' }} />
-                                        </Box>
-                                        <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Briefcase size={16} /> {selectedLead.loan_type} • ₹{Number(selectedLead.loan_amount || 0).toLocaleString()}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box>
-                        </DialogTitle>
-                        <DialogContent sx={{ p: 0 }}>
-                            <Box sx={{ p: 3 }}>
-                                <Grid container spacing={3}>
-                                    <Grid size={ 12 } md={6}>
-                                        <Paper sx={{ p: 2.5, borderRadius: 4, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', height: '100%' }}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}><User size={16} /> Contact Details</Typography>
-                                            <Stack spacing={2}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}><Phone size={18} /></Box>
-                                                    <Box>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Mobile Number</Typography>
-                                                        <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedLead.mobile}</Typography>
-                                                    </Box>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}><Mail size={18} /></Box>
-                                                    <Box>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Email Address</Typography>
-                                                        <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedLead.email || 'Not Provided'}</Typography>
-                                                    </Box>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main' }}><MapPin size={18} /></Box>
-                                                    <Box>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Location (City)</Typography>
-                                                        <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedLead.city || 'Not Provided'}</Typography>
-                                                    </Box>
-                                                </Box>
-                                            </Stack>
-                                        </Paper>
-                                    </Grid>
-                                    <Grid size={ 12 } md={6}>
-                                        <Paper sx={{ p: 2.5, borderRadius: 4, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', height: '100%' }}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}><Info size={16} /> Application Info</Typography>
-                                            <Stack spacing={2}>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(theme.palette.success.main, 0.1), color: 'success.main' }}><CreditCard size={18} /></Box>
-                                                    <Box>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Expected Loan Amount</Typography>
-                                                        <Typography variant="body1" sx={{ fontWeight: 800, color: 'success.main' }}>₹{Number(selectedLead.loan_amount || 0).toLocaleString()}</Typography>
-                                                    </Box>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(theme.palette.info.main, 0.1), color: 'info.main' }}><Activity size={18} /></Box>
-                                                    <Box>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Lead Source</Typography>
-                                                        <Typography variant="body1" sx={{ fontWeight: 700 }}>{selectedLead.source}</Typography>
-                                                    </Box>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(theme.palette.warning.main, 0.1), color: 'warning.main' }}><Clock size={18} /></Box>
-                                                    <Box>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>Created Date</Typography>
-                                                        <Typography variant="body1" sx={{ fontWeight: 700 }}>{new Date(selectedLead.created_at).toLocaleString()}</Typography>
-                                                    </Box>
-                                                </Box>
-                                            </Stack>
-                                        </Paper>
-                                    </Grid>
-                                    <Grid size={ 12 }>
-                                        <Box sx={{ mt: 1, p: 2.5, borderRadius: 4, bgcolor: alpha(theme.palette.primary.main, 0.03), border: '1px dashed', borderColor: 'primary.main', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Box>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main', mb: 0.5 }}>Next Action Items</Typography>
-                                                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>Update the case log to proceed with application processing.</Typography>
-                                            </Box>
-                                            <Stack direction="row" spacing={2}>
-                                                <Button variant="outlined" sx={{ borderRadius: 3, fontWeight: 700 }} onClick={() => { setViewOpen(false); handleEditLead(selectedLead); }} startIcon={<Edit2 size={18} />}>Edit Data</Button>
-                                                <Button variant="contained" sx={{ borderRadius: 3, fontWeight: 700, px: 3, boxShadow: '0 8px 24px rgba(37, 99, 235, 0.2)' }} onClick={() => { setViewOpen(false); navigate(`/cases/lead/${selectedLead.id}`); }} endIcon={<ExternalLink size={18} />}>Open Case File</Button>
-                                            </Stack>
-                                        </Box>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={() => setViewOpen(false)} color="inherit">Close</Button>
-                        </DialogActions>
-                    </>
-                )}
-            </Dialog>
-
-            {/* Edit Lead Dialog */}
-            <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth>
-                <DialogTitle sx={{ fontWeight: 700 }}>Edit Application: {selectedLead?.name}</DialogTitle>
-                <DialogContent dividers>
-                    <Grid container spacing={3} sx={{ mt: 0.5 }}>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="name" label="Full Name" required value={formData.name} onChange={handleFormChange} />
+            {/* New Application Dialog */}
+            <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ fontWeight: 800, p: 3, borderBottom: '1px solid #f1f5f9' }}>Create New Registry Record</DialogTitle>
+                <DialogContent sx={{ p: 4 }}>
+                    <Grid container spacing={3}>
+                        <Grid size={12} md={6}>
+                            <TextField fullWidth label="Applicant Name" name="applicant_name" required value={formData.applicant_name} onChange={handleFormChange} placeholder="Full name of student" />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="mobile" label="Mobile Number" required value={formData.mobile} onChange={handleFormChange} />
+                        <Grid size={12} md={6}>
+                            <TextField fullWidth label="Contact Number" name="phone" required value={formData.phone} onChange={handleFormChange} placeholder="e.g. +91 9876543210" />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="email" label="Email Address" value={formData.email} onChange={handleFormChange} />
+                        <Grid size={12} md={6}>
+                            <TextField fullWidth label="Unique ID (UNID)" name="uid" value={formData.uid} onChange={handleFormChange} placeholder="e.g. VEDA-ST-001 (Optional)" />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="city" label="City" value={formData.city} onChange={handleFormChange} />
+                        <Grid size={12} md={6}>
+                            <TextField fullWidth label="Email Address" name="email" value={formData.email} onChange={handleFormChange} />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField select fullWidth name="status" label="Lead Status" value={formData.status || ''} onChange={handleFormChange}>
-                                {stages.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                            </TextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField select fullWidth name="loan_type" label="Loan Type" value={formData.loan_type} onChange={handleFormChange}>
+                        <Grid size={12} md={6}>
+                            <TextField select fullWidth label="Loan Type" name="loan_type" value={formData.loan_type} onChange={handleFormChange}>
                                 {loanTypes.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
                             </TextField>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="loan_amount" label="Loan Amount" type="number" value={formData.loan_amount} onChange={handleFormChange} />
+                        <Grid size={12} md={6}>
+                            <TextField fullWidth label="Expected Loan Amount" name="loan_amount" type="number" value={formData.loan_amount} onChange={handleFormChange} />
                         </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="assigned_to" label="Assigned To (Name)" value={formData.assigned_to || ''} onChange={handleFormChange} placeholder="e.g. Sales Rep Name" />
+                        <Grid size={12} md={4}>
+                            <TextField fullWidth label="Location" name="city" value={formData.city} onChange={handleFormChange} />
+                        </Grid>
+                        <Grid size={12} md={4}>
+                            <TextField fullWidth label="State" name="state" value={formData.state} onChange={handleFormChange} />
+                        </Grid>
+                        <Grid size={12} md={4}>
+                            <Box sx={{ border: '2px dashed #cbd5e1', borderRadius: 2, p: 1, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', cursor: 'pointer' }} onClick={() => fileInputRef.current.click()}>
+                                <input type="file" hidden ref={fileInputRef} accept=".zip" onChange={handleFileChange} />
+                                {zipFile ? (
+                                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                                        <FileArchive size={14} /> {zipFile.name.slice(0, 15)}...
+                                    </Typography>
+                                ) : (
+                                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                        <Upload size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                                        Upload Student ZIP
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField fullWidth multiline rows={2} label="Additional Notes" name="notes" value={formData.notes} onChange={handleFormChange} />
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions sx={{ p: 3 }}>
-                    <Button onClick={() => setEditOpen(false)} color="inherit">Cancel</Button>
-                    <Button 
-                        variant="contained" 
-                        onClick={async () => {
-                            try {
-                                await leadService.updateLead(selectedLead.id, formData);
-                                setEditOpen(false);
-                                fetchLeads();
-                            } catch (e) {
-                                console.error('Failed to update lead', e);
-                                alert('Error updating lead');
-                            }
-                        }} 
-                        sx={{ px: 4 }}
-                    >
-                        Save Changes
+                <DialogActions sx={{ p: 3, borderTop: '1px solid #f1f5f9' }}>
+                    <Button onClick={() => setCreateOpen(false)} color="inherit" sx={{ fontWeight: 700 }}>Cancel</Button>
+                    <Button variant="contained" disabled={submitting} onClick={handleCreateSubmit} sx={{ fontWeight: 800, px: 4, borderRadius: 3 }}>
+                        {submitting ? 'Saving...' : 'Register Student'}
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
-                <DialogContent dividers>
-                    <Grid container spacing={3} sx={{ mt: 0.5 }}>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="name" label="Full Name" required value={formData.name} onChange={handleFormChange} />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="mobile" label="Mobile Number" required value={formData.mobile} onChange={handleFormChange} />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="email" label="Email Address" value={formData.email} onChange={handleFormChange} />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="city" label="City" value={formData.city} onChange={handleFormChange} />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField select fullWidth name="source" label="Lead Source" value={formData.source} onChange={handleFormChange}>
-                                {leadSources.map((option) => (
-                                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField select fullWidth name="loan_type" label="Loan Type" value={formData.loan_type} onChange={handleFormChange}>
-                                {loanTypes.map((option) => (
-                                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                                ))}
-                            </TextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="loan_amount" label="Loan Amount" type="number" value={formData.loan_amount} onChange={handleFormChange} />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <TextField fullWidth name="assigned_to" label="Assign To (Optional)" value={formData.assigned_to || ''} onChange={handleFormChange} placeholder="Employee Name" />
-                        </Grid>
-                    </Grid>
+            {/* Process Application Modal */}
+            <Dialog open={processOpen} onClose={() => setProcessOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ fontWeight: 800 }}>Loan Processing Details</DialogTitle>
+                <DialogContent>
+                    <Stack spacing={3} sx={{ mt: 1 }}>
+                        <TextField fullWidth label="NBFC / Bank Name" value={processData.nbfc_name} onChange={(e) => setProcessData({...processData, nbfc_name: e.target.value})} placeholder="e.g. HDFC, Incred, etc." />
+                        <TextField fullWidth label="Branch" value={processData.branch_name} onChange={(e) => setProcessData({...processData, branch_name: e.target.value})} />
+                        <TextField fullWidth type="date" label="Application Filed Date" value={processData.application_date} onChange={(e) => setProcessData({...processData, application_date: e.target.value})} InputLabelProps={{ shrink: true }} />
+                        <TextField select fullWidth label="Current Stage" value={processData.status} onChange={(e) => setProcessData({...processData, status: e.target.value})}>
+                            {statusStages.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+                        </TextField>
+                        
+                        {processData.status === 'Approved' && (
+                            <TextField fullWidth type="number" label="Final Approved Amount" value={processData.approved_amount} onChange={(e) => setProcessData({...processData, approved_amount: e.target.value})} sx={{ bgcolor: alpha('#10b981', 0.05) }} />
+                        )}
+
+                        {processData.status === 'Rejected' && (
+                            <TextField fullWidth multiline rows={2} label="Rejection Reason" value={processData.rejection_reason} onChange={(e) => setProcessData({...processData, rejection_reason: e.target.value})} sx={{ bgcolor: alpha('#ef4444', 0.05) }} />
+                        )}
+                    </Stack>
                 </DialogContent>
                 <DialogActions sx={{ p: 3 }}>
-                    <Button onClick={() => setOpen(false)} color="inherit">Cancel</Button>
-                    <Button variant="contained" onClick={handleSubmit} sx={{ px: 4 }}>Save Application</Button>
+                    <Button onClick={() => setProcessOpen(false)} color="inherit">Cancel</Button>
+                    <Button variant="contained" disabled={submitting} onClick={handleProcessSubmit}>Update Record</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Share Modal */}
+            <Dialog open={shareOpen} onClose={() => setShareOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 4 } }}>
+                <DialogTitle sx={{ fontWeight: 800 }}>Share with Credit Partner</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>Select a partner to share this student application and documents for processing.</Typography>
+                    <TextField select fullWidth label="Choose Credit Partner" value={selectedPartner} onChange={(e) => setSelectedPartner(e.target.value)}>
+                        {partners.map(p => (
+                            <MenuItem key={p.id} value={p.id}>{p.bank_name} - {p.partner_name}</MenuItem>
+                        ))}
+                    </TextField>
+                </DialogContent>
+                <DialogActions sx={{ p: 3 }}>
+                    <Button onClick={() => setShareOpen(false)} color="inherit">Cancel</Button>
+                    <Button variant="contained" color="success" disabled={submitting} onClick={handleShareSubmit} startIcon={<Send size={18} />}>Send Details</Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* View History Drawer (Optional but helpful) */}
+            <Drawer anchor="right" open={viewOpen} onClose={() => setViewOpen(false)} PaperProps={{ sx: { width: 400, p: 3 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Application History</Typography>
+                    <IconButton onClick={() => setViewOpen(false)}><X size={20} /></IconButton>
+                </Box>
+                {selectedApp && (
+                    <Box>
+                        <Box sx={{ mb: 4, p: 2, bgcolor: '#f8fafc', borderRadius: 3 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{selectedApp.applicant_name}</Typography>
+                            <Typography variant="caption" color="text.secondary">UNID: {selectedApp.uid}</Typography>
+                        </Box>
+                        <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}><History size={16} /> Activity Log</Typography>
+                        <Alert severity="info" sx={{ py: 0.5, borderRadius: 2 }}>Workflow history tracking is enabled.</Alert>
+                        {/* Here we could map through application_activities if fetched */}
+                    </Box>
+                )}
+            </Drawer>
+
         </Box>
     );
 };

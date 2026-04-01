@@ -30,6 +30,7 @@ import {
     Calendar, 
     BookOpen, 
     Building, 
+    Building2,
     DollarSign, 
     History, 
     MessageSquare, 
@@ -359,10 +360,59 @@ const ApplicationDetail = () => {
                                 <SectionHeader title="Loan Requirements" icon={<Briefcase size={20} />} />
                                 <Grid container spacing={2}>
                                     <Grid size={{ xs: 12, sm: 4 }}><InfoBlock label="Loan Type" value={application.course} name="course" icon={<FileText size={14} />} /></Grid>
-                                    <Grid size={{ xs: 12, sm: 4 }}><InfoBlock label="Requested Amount" value={application.loan_amount} name="loan_amount" type="number" /></Grid>
-                                    <Grid size={{ xs: 12, sm: 4 }}><InfoBlock label="Expected Tenure" value={application.loan_tenure} name="loan_tenure" type="number" /></Grid>
+                                    <Grid size={{ xs: 12, sm: 4 }}><InfoBlock label="Requested Amount" value={application.loan_amount ? `₹${parseFloat(application.loan_amount).toLocaleString()}` : 'N/A'} name="loan_amount" type="number" /></Grid>
+                                    <Grid size={{ xs: 12, sm: 4 }}><InfoBlock label="Application Date" value={application.application_date ? new Date(application.application_date).toLocaleDateString() : new Date(application.created_at).toLocaleDateString()} name="application_date" type="date" icon={<Calendar size={14} />} /></Grid>
                                     <Grid size={{ xs: 12 }}><InfoBlock label="Loan Purpose" value={application.loan_purpose} name="loan_purpose" /></Grid>
                                 </Grid>
+
+                                <Divider sx={{ my: 4 }} />
+
+                                {/* Partner/Bank Details */}
+                                <SectionHeader title="Partner Bank Details" icon={<Building2 size={20} />} />
+                                <Grid container spacing={2}>
+                                    <Grid size={{ xs: 12, sm: 6 }}><InfoBlock label="NBFC / Bank Name" value={application.bank_name} name="bank_name" icon={<Building2 size={14} />} /></Grid>
+                                    <Grid size={{ xs: 12, sm: 6 }}><InfoBlock label="Branch Name" value={application.branch_name} name="branch_name" icon={<Building size={14} />} /></Grid>
+                                </Grid>
+
+                                {/* Conditional: Approved Amount */}
+                                {(application.status === 'Approved' || application.status === 'Disbursed') && (
+                                    <>
+                                        <Divider sx={{ my: 4 }} />
+                                        <SectionHeader title="Approval Details" icon={<CheckCircle2 size={20} />} />
+                                        <Grid container spacing={2}>
+                                            <Grid size={{ xs: 12, sm: 6 }}>
+                                                <Box sx={{ mb: 2 }}>
+                                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
+                                                        <CheckCircle2 size={14} /> Approved Amount
+                                                    </Typography>
+                                                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'success.main' }}>
+                                                        ₹{parseFloat(application.approved_amount || application.loan_amount).toLocaleString()}
+                                                    </Typography>
+                                                </Box>
+                                            </Grid>
+                                        </Grid>
+                                    </>
+                                )}
+
+                                {/* Conditional: Rejection Reason */}
+                                {application.status === 'Rejected' && (
+                                    <>
+                                        <Divider sx={{ my: 4 }} />
+                                        <SectionHeader title="Rejection Details" icon={<AlertCircle size={20} />} />
+                                        <Grid container spacing={2}>
+                                            <Grid size={{ xs: 12 }}>
+                                                <Paper sx={{ p: 2, borderRadius: 2, bgcolor: alpha(theme.palette.error.main, 0.05), border: '1px solid', borderColor: alpha(theme.palette.error.main, 0.2) }}>
+                                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
+                                                        <AlertCircle size={14} color="error" /> Rejection Reason
+                                                    </Typography>
+                                                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'error.main' }}>
+                                                        {application.rejection_reason || 'No reason provided'}
+                                                    </Typography>
+                                                </Paper>
+                                            </Grid>
+                                        </Grid>
+                                    </>
+                                )}
 
                                 {/* Education Specifics */}
                                 {(application.course === 'Education Loan' || editedData.course === 'Education Loan') && (
@@ -502,6 +552,48 @@ const ApplicationDetail = () => {
                                     {s}
                                 </Button>
                             ))}
+                        </Stack>
+                    </Paper>
+
+                    {/* Partner Bank Details Section */}
+                    <Paper sx={{ p: 3, borderRadius: 5, mb: 4, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Building2 size={18} /> Partner Bank Details
+                        </Typography>
+                        <Stack spacing={2}>
+                            {isEditing ? (
+                                <>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        label="NBFC / Bank Name"
+                                        name="bank_name"
+                                        value={editedData.bank_name || ''}
+                                        onChange={handleEditDataChange}
+                                        placeholder="e.g. HDFC Bank"
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        label="Branch Name"
+                                        name="branch_name"
+                                        value={editedData.branch_name || ''}
+                                        onChange={handleEditDataChange}
+                                        placeholder="e.g. Gurugram Branch"
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">Bank</Typography>
+                                        <Typography sx={{ fontWeight: 700 }}>{application.bank_name || 'Not assigned'}</Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">Branch</Typography>
+                                        <Typography sx={{ fontWeight: 700 }}>{application.branch_name || 'Not assigned'}</Typography>
+                                    </Box>
+                                </>
+                            )}
                         </Stack>
                     </Paper>
 

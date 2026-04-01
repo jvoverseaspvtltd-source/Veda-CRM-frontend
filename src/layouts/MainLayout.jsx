@@ -132,9 +132,8 @@ const MainLayout = ({ children }) => {
     const menuItems = [
         { text: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
         { text: 'Online Submissions', icon: <Globe size={20} />, path: '/forms', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller'] },
-        { text: 'Application Registry', icon: <Briefcase size={20} />, path: '/leads', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
+        { text: 'Application Registry', icon: <Briefcase size={20} />, path: '/applications', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
         { text: 'Pipeline Tracker', icon: <Activity size={20} />, path: '/cases', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'JV Overseas'] },
-        { text: 'Disbursement Desk', icon: <FolderKanban size={20} />, path: '/applications', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'JV Overseas'] },
         { text: 'Eligibility Hub', icon: <Target size={20} />, path: '/eligibility-hub', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager'] },
         { text: 'Banks', icon: <Building2 size={20} />, path: '/banks', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager'] },
 

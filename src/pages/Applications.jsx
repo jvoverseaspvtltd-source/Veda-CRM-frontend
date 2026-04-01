@@ -56,7 +56,9 @@ import {
     FileText,
     RefreshCw,
     RotateCcw,
-    Filter
+    Filter,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { applicationService, lendingPartnerService } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -86,6 +88,10 @@ const Applications = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState(0);
+    
+    // Pagination
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
     
     // Add Application Modal
     const [openAddModal, setOpenAddModal] = useState(false);
@@ -146,6 +152,10 @@ const Applications = () => {
             a.uid?.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesSearch;
     });
+
+    useEffect(() => {
+        setPage(0);
+    }, [searchTerm, activeTab]);
 
     const getFilteredApplications = () => {
         const tabs = ['All', 'New Application', 'Submitted to Bank', 'Under Process', 'Approved', 'Rejected'];
@@ -443,7 +453,7 @@ const Applications = () => {
                     <TableBody>
                         {loading ? (
                             <TableRow><TableCell colSpan={7} align="center" sx={{ py: 10 }}><CircularProgress /></TableCell></TableRow>
-                        ) : getFilteredApplications().length === 0 ? (
+                        ) : getFilteredApplications().slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
                                     <Box sx={{ textAlign: 'center' }}>
@@ -463,7 +473,7 @@ const Applications = () => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            getFilteredApplications().map((a) => (
+                            getFilteredApplications().slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((a) => (
                                 <TableRow key={a.id} hover sx={{ '&:hover': { bgcolor: alpha(theme.palette.primary.main, 0.02) } }}>
                                     <TableCell>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -532,6 +542,36 @@ const Applications = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* Pagination */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, px: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary">Rows per page:</Typography>
+                    <TextField
+                        select
+                        size="small"
+                        value={rowsPerPage}
+                        onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(0); }}
+                        sx={{ width: 80 }}
+                    >
+                        <MenuItem value={5}>5</MenuItem>
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={25}>25</MenuItem>
+                        <MenuItem value={50}>50</MenuItem>
+                    </TextField>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
+                        Showing {page * rowsPerPage + 1} - {Math.min((page + 1) * rowsPerPage, getFilteredApplications().length)} of {getFilteredApplications().length}
+                    </Typography>
+                    <IconButton size="small" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>
+                        <ChevronLeft size={18} />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => setPage(p => Math.min(Math.ceil(getFilteredApplications().length / rowsPerPage) - 1, p + 1))} disabled={page >= Math.ceil(getFilteredApplications().length / rowsPerPage) - 1}>
+                        <ChevronRight size={18} />
+                    </IconButton>
+                </Box>
+            </Box>
 
             {/* ═══════════════════════════════════════════════════════════ */}
             {/* Add Application Modal */}
