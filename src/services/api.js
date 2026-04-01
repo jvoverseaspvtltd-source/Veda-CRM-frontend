@@ -114,6 +114,10 @@ export const authService = {
     deleteUser: async (id) => {
         const response = await api.delete(`/auth/profile/${id}`);
         return response.data;
+    },
+    createEmployee: async (employeeData) => {
+        const response = await api.post('/auth/employee', employeeData);
+        return response.data;
     }
 };
 
