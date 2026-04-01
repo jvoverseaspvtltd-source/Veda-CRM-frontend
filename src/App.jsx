@@ -88,7 +88,7 @@ function App() {
                     <Route path="/veda/chat" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><CRMChat /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/veda/chat/user/:id" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><CRMChat /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/tracking-dashboard" element={<ProtectedRoute roles={['Super Admin', 'Admin']}><MainLayout><LazyPage><TrackingDashboard /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/employees" element={<ProtectedRoute roles={['Super Admin']}><MainLayout><LazyPage><Employees /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/employees" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent']}><MainLayout><LazyPage><Employees /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><MainLayout><LazyPage><Profile /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><MainLayout><LazyPage><Settings /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/forms" element={<ProtectedRoute><MainLayout><LazyPage><Forms /></LazyPage></MainLayout></ProtectedRoute>} />

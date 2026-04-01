@@ -139,7 +139,7 @@ const MainLayout = ({ children }) => {
 
         { text: 'Commissions', icon: <DollarSign size={20} />, path: '/commissions', roles: ['Super Admin', 'Admin', 'Partner'] },
         { text: 'Credit Partners', icon: <Handshake size={20} />, path: '/lending-partners', roles: ['Super Admin', 'Admin', 'Loan Manager', 'JV Overseas', 'DSA Agent', 'Telecaller', 'Partner'] },
-        { text: 'Employees', icon: <Users size={20} />, path: '/employees', roles: ['Super Admin'] },
+        { text: 'Employees', icon: <Users size={20} />, path: '/employees', roles: ['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent'] },
         { text: 'Performance', icon: <TrendingUp size={20} />, path: '/performance', roles: ['Super Admin', 'Admin', 'Partner'] },
         { text: 'Settings', icon: <Settings size={20} />, path: '/settings', roles: ['Super Admin', 'Admin', 'Partner'] },
         { text: 'Tracking Analytics', icon: <TrendingUp size={20} />, path: '/tracking-dashboard', roles: ['Super Admin', 'Admin'] },
