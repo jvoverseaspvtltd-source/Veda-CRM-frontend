@@ -3,7 +3,7 @@ import {
     Box, Typography, Button, Paper, Table, TableBody, TableCell,
     TableContainer, TableHead, TableRow, Chip, IconButton, TextField,
     Dialog, DialogTitle, DialogContent, DialogActions, Grid, MenuItem,
-    CircularProgress, Tooltip, Snackbar, Alert
+    CircularProgress, Tooltip, Snackbar, Alert, Avatar
 } from '@mui/material';
 import { UserPlus, Edit, Trash2, Mail, ShieldCheck, Download, Copy, Building2, User } from 'lucide-react';
 import { authService } from '../services/api';
