@@ -129,22 +129,22 @@ const MainLayout = ({ children }) => {
     const role = profile?.role || 'Super Admin';
 
     const menuItems = [
-        { text: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/', roles: ['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
-        { text: 'Online Submissions', icon: <Globe size={20} />, path: '/forms', roles: ['Super Admin', 'Admin', 'Loan Manager', 'Telecaller'] },
-        { text: 'Application Registry', icon: <Briefcase size={20} />, path: '/leads', roles: ['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
-        { text: 'Stage Tracker', icon: <Activity size={20} />, path: '/cases', roles: ['Super Admin', 'Admin', 'Loan Manager', 'JV Overseas'] },
-        { text: 'Disbursement Desk', icon: <FolderKanban size={20} />, path: '/applications', roles: ['Super Admin', 'Admin', 'Loan Manager', 'JV Overseas'] },
-        { text: 'Eligibility Hub', icon: <Target size={20} />, path: '/eligibility-hub', roles: ['Super Admin', 'Admin', 'Loan Manager'] },
-        { text: 'Banks', icon: <Building2 size={20} />, path: '/banks', roles: ['Super Admin', 'Admin', 'Loan Manager'] },
+        { text: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
+        { text: 'Online Submissions', icon: <Globe size={20} />, path: '/forms', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller'] },
+        { text: 'Application Registry', icon: <Briefcase size={20} />, path: '/leads', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
+        { text: 'Stage Tracker', icon: <Activity size={20} />, path: '/cases', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'JV Overseas'] },
+        { text: 'Disbursement Desk', icon: <FolderKanban size={20} />, path: '/applications', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'JV Overseas'] },
+        { text: 'Eligibility Hub', icon: <Target size={20} />, path: '/eligibility-hub', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager'] },
+        { text: 'Banks', icon: <Building2 size={20} />, path: '/banks', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager'] },
 
         { text: 'Commissions', icon: <DollarSign size={20} />, path: '/commissions', roles: ['Super Admin', 'Admin', 'Partner'] },
-        { text: 'Credit Partners', icon: <Handshake size={20} />, path: '/lending-partners', roles: ['Super Admin', 'Admin', 'Loan Manager', 'JV Overseas', 'DSA Agent', 'Telecaller', 'Partner'] },
-        { text: 'Employees', icon: <Users size={20} />, path: '/employees', roles: ['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent'] },
-        { text: 'Performance', icon: <TrendingUp size={20} />, path: '/performance', roles: ['Super Admin', 'Admin', 'Partner'] },
+        { text: 'Credit Partners', icon: <Handshake size={20} />, path: '/lending-partners', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'JV Overseas', 'DSA Agent', 'Telecaller', 'Partner'] },
+        { text: 'Employees', icon: <Users size={20} />, path: '/employees', roles: ['Super Admin', 'Admin'] },
+        { text: 'Performance', icon: <TrendingUp size={20} />, path: '/performance', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Partner'] },
         { text: 'Settings', icon: <Settings size={20} />, path: '/settings', roles: ['Super Admin', 'Admin', 'Partner'] },
         { text: 'Tracking Analytics', icon: <TrendingUp size={20} />, path: '/tracking-dashboard', roles: ['Super Admin', 'Admin'] },
-        { text: 'Chat', icon: <MessageSquareDiff size={20} />, path: role === 'Partner' ? '/partner/chat' : '/veda/chat', roles: ['Super Admin', 'Admin', 'Partner'] },
-        { text: 'Help Desk', icon: <LifeBuoy size={20} />, path: '/help-desk', roles: ['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
+        { text: 'Chat', icon: <MessageSquareDiff size={20} />, path: role === 'Partner' ? '/partner/chat' : '/veda/chat', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Partner'] },
+        { text: 'Help Desk', icon: <LifeBuoy size={20} />, path: '/help-desk', roles: ['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner'] },
     ];
 
     const filteredMenu = menuItems.filter(item => item.roles.includes(role));

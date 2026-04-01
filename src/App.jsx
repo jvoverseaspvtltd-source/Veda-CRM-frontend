@@ -77,22 +77,22 @@ function App() {
                     <Route path="/cases" element={<ProtectedRoute><MainLayout><LazyPage><Cases /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/applications" element={<ProtectedRoute><MainLayout><LazyPage><Applications /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/applications/:id" element={<ProtectedRoute><MainLayout><LazyPage><ApplicationDetail /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/eligibility-hub" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager']}><MainLayout><LazyPage><EligibilityHub /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/banks" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager']}><MainLayout><LazyPage><Banks /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/eligibility-hub" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager']}><MainLayout><LazyPage><EligibilityHub /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/banks" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager']}><MainLayout><LazyPage><Banks /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/commissions" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><Commissions /></LazyPage></MainLayout></ProtectedRoute>} />
 
-                    <Route path="/performance" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><Performance /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/lending-partners" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager', 'Partner']}><MainLayout><LazyPage><LendingPartners /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/lending-partners/:id" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager', 'Partner']}><MainLayout><LazyPage><PartnerDetail /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/inflow" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><Inflow /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/veda/chat" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><CRMChat /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/veda/chat/user/:id" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><CRMChat /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/performance" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Partner']}><MainLayout><LazyPage><Performance /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/lending-partners" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Partner']}><MainLayout><LazyPage><LendingPartners /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/lending-partners/:id" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Partner']}><MainLayout><LazyPage><PartnerDetail /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/inflow" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Partner']}><MainLayout><LazyPage><Inflow /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/veda/chat" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Partner']}><MainLayout><LazyPage><CRMChat /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/veda/chat/user/:id" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Partner']}><MainLayout><LazyPage><CRMChat /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/tracking-dashboard" element={<ProtectedRoute roles={['Super Admin', 'Admin']}><MainLayout><LazyPage><TrackingDashboard /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/employees" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent']}><MainLayout><LazyPage><Employees /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/employees" element={<ProtectedRoute roles={['Super Admin', 'Admin']}><MainLayout><LazyPage><Employees /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><MainLayout><LazyPage><Profile /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><MainLayout><LazyPage><Settings /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/forms" element={<ProtectedRoute><MainLayout><LazyPage><Forms /></LazyPage></MainLayout></ProtectedRoute>} />
-                    <Route path="/help-desk" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner']}><MainLayout><LazyPage><HelpDesk /></LazyPage></MainLayout></ProtectedRoute>} />
+                    <Route path="/help-desk" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Normal Employee', 'Loan Manager', 'Telecaller', 'JV Overseas', 'DSA Agent', 'Partner']}><MainLayout><LazyPage><HelpDesk /></LazyPage></MainLayout></ProtectedRoute>} />
                     <Route path="/zip-transactions" element={<ProtectedRoute roles={['Super Admin', 'Admin', 'Partner']}><MainLayout><LazyPage><ZipTransactions /></LazyPage></MainLayout></ProtectedRoute>} />
                     
                     {/* Legacy Public Forms */}
