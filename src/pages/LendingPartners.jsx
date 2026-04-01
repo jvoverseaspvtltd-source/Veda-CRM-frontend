@@ -89,110 +89,306 @@ Font.register({
     ]
 });
 
-// ─── PDF Document Component (Partner Version) ──────────────────────────────
+// ─── PDF Document Component (Premium Finance Style) ─────────────────────────
 const PDFStyles = StyleSheet.create({
     page: { padding: 40, fontFamily: 'Inter', backgroundColor: '#ffffff' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 30, borderBottomWidth: 1, borderBottomColor: '#eeeff2', paddingBottom: 15 },
+    header: { 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        marginBottom: 30, 
+        borderBottomWidth: 2, 
+        borderBottomColor: '#0f172a', 
+        paddingBottom: 20 
+    },
     logoSection: { flexDirection: 'column' },
-    logoLabel: { fontSize: 24, fontWeight: 900, color: '#2563eb' },
-    headerTitle: { fontSize: 10, color: '#64748b', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
-    badge: { backgroundColor: '#f0fdf4', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, border: '1px solid #dcfce7' },
-    badgeText: { fontSize: 8, color: '#166534', fontWeight: 700 },
+    logoLabel: { fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: -1 },
+    headerSubtitle: { fontSize: 10, color: '#64748b', marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.5 },
+    badge: { 
+        backgroundColor: '#f0fdf4', 
+        paddingHorizontal: 12, 
+        paddingVertical: 6, 
+        borderRadius: 6, 
+        border: '1px solid #dcfce7' 
+    },
+    badgeText: { fontSize: 9, color: '#166534', fontWeight: 700, letterSpacing: 0.5 },
 
-    titleSection: { marginBottom: 25 },
-    mainTitle: { fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 5 },
-    subTitle: { fontSize: 10, color: '#64748b' },
+    divider: { 
+        height: 4, 
+        backgroundColor: '#2563eb', 
+        marginBottom: 25 
+    },
 
-    section: { marginBottom: 20 },
-    sectionLabel: { fontSize: 10, fontWeight: 700, color: '#475569', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+    titleSection: { marginBottom: 30 },
+    mainTitle: { fontSize: 22, fontWeight: 700, color: '#0f172a', marginBottom: 8 },
+    subTitle: { fontSize: 11, color: '#64748b' },
+    docId: { fontSize: 9, color: '#94a3b8', marginTop: 4 },
+
+    section: { marginBottom: 25 },
+    sectionHeader: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        marginBottom: 15,
+        borderBottom: '1px solid #e2e8f0',
+        paddingBottom: 8
+    },
+    sectionLabel: { fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: 1 },
+    sectionIcon: { marginRight: 8 },
     
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 15 },
-    fieldBox: { width: '47%', marginBottom: 12 },
-    fieldLabel: { fontSize: 8, color: '#94a3b8', marginBottom: 2, textTransform: 'uppercase' },
-    fieldValue: { fontSize: 10, color: '#1e293b', fontWeight: 600 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 20 },
+    fieldBox: { width: '47%', marginBottom: 15 },
+    fieldLabel: { fontSize: 8, color: '#94a3b8', marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 },
+    fieldValue: { fontSize: 11, color: '#1e293b', fontWeight: 600 },
+    fieldValueLarge: { fontSize: 13, color: '#0f172a', fontWeight: 700 },
 
     credentialCard: { 
         backgroundColor: '#f8fafc', 
-        borderRadius: 8, 
-        padding: 15, 
+        borderRadius: 10, 
+        padding: 20, 
         border: '1px solid #e2e8f0',
+        borderLeftWidth: 4,
+        borderLeftColor: '#2563eb',
         marginTop: 10,
         marginBottom: 20
     },
-    credentialRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-    passwordBox: { backgroundColor: '#ffffff', border: '1px dashed #cbd5e1', padding: 10, marginTop: 10, alignItems: 'center' },
-    passwordText: { fontSize: 14, fontWeight: 700, color: '#ef4444', letterSpacing: 1 },
+    credentialRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, alignItems: 'center' },
+    credentialDivider: { 
+        borderBottom: '1px dashed #cbd5e1', 
+        marginVertical: 15 
+    },
+    passwordBox: { 
+        backgroundColor: '#ffffff', 
+        border: '2px dashed #2563eb', 
+        padding: 15, 
+        marginTop: 12, 
+        alignItems: 'center',
+        borderRadius: 8
+    },
+    passwordLabel: { fontSize: 9, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 },
+    passwordText: { fontSize: 18, fontWeight: 700, color: '#dc2626', letterSpacing: 3 },
 
-    noteBox: { backgroundColor: '#fef3c7', padding: 10, borderRadius: 6, marginTop: 10 },
-    noteText: { fontSize: 8, color: '#92400e', lineHeight: 1.4 },
+    accessCard: {
+        backgroundColor: '#eff6ff',
+        borderRadius: 8,
+        padding: 15,
+        marginTop: 10,
+        border: '1px solid #bfdbfe'
+    },
+    accessRow: { flexDirection: 'row', marginBottom: 8, alignItems: 'center' },
+    accessLabel: { fontSize: 9, color: '#1e40af', fontWeight: 600, width: 100 },
+    accessValue: { fontSize: 10, color: '#1e293b', fontWeight: 700, flex: 1 },
 
-    footer: { position: 'absolute', bottom: 40, left: 40, right: 40, borderTopWidth: 1, borderTopColor: '#f1f5f9', paddingTop: 15, flexDirection: 'row', justifyContent: 'space-between' },
-    footerText: { fontSize: 7, color: '#94a3b8' }
+    supportCard: {
+        backgroundColor: '#fefce8',
+        borderRadius: 8,
+        padding: 15,
+        marginTop: 15,
+        border: '1px solid #fef08a'
+    },
+    supportTitle: { fontSize: 10, fontWeight: 700, color: '#854d0e', marginBottom: 10 },
+    supportRow: { flexDirection: 'row', marginBottom: 6, alignItems: 'center' },
+    supportLabel: { fontSize: 9, color: '#92400e', width: 120 },
+    supportValue: { fontSize: 10, color: '#713f12', fontWeight: 600 },
+
+    noteBox: { 
+        backgroundColor: '#fef3c7', 
+        padding: 12, 
+        borderRadius: 6, 
+        marginTop: 15,
+        borderLeftWidth: 4,
+        borderLeftColor: '#f59e0b'
+    },
+    noteText: { fontSize: 9, color: '#92400e', lineHeight: 1.5 },
+
+    nextSteps: {
+        backgroundColor: '#f0fdf4',
+        borderRadius: 8,
+        padding: 15,
+        marginTop: 15,
+        border: '1px solid #bbf7d0'
+    },
+    nextStepsTitle: { fontSize: 10, fontWeight: 700, color: '#166534', marginBottom: 8 },
+    stepRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'flex-start' },
+    stepNumber: { 
+        width: 18, 
+        height: 18, 
+        borderRadius: 9, 
+        backgroundColor: '#10b981', 
+        color: '#fff', 
+        fontSize: 9, 
+        fontWeight: 700,
+        textAlign: 'center',
+        lineHeight: 18,
+        marginRight: 8
+    },
+    stepText: { fontSize: 9, color: '#166534', flex: 1, lineHeight: 1.4 },
+
+    footer: { 
+        position: 'absolute', 
+        bottom: 30, 
+        left: 40, 
+        right: 40, 
+        borderTopWidth: 1, 
+        borderTopColor: '#f1f5f9', 
+        paddingTop: 15, 
+        flexDirection: 'row', 
+        justifyContent: 'space-between' 
+    },
+    footerLeft: { flexDirection: 'column' },
+    footerRight: { alignItems: 'flex-end' },
+    footerText: { fontSize: 8, color: '#94a3b8', marginBottom: 2 },
+    footerConfidential: { fontSize: 9, color: '#dc2626', fontWeight: 700 }
 });
 
-const CredentialsPDF = ({ creds }) => (
+const CredentialsPDF = ({ creds, createdBy }) => (
     <Document>
         <Page size="A4" style={PDFStyles.page}>
             {/* Header */}
             <View style={PDFStyles.header}>
                 <View style={PDFStyles.logoSection}>
-                    <Text style={PDFStyles.logoLabel}>Veda CRM</Text>
-                    <Text style={PDFStyles.headerTitle}>Premium Onboarding Services</Text>
+                    <Text style={PDFStyles.logoLabel}>VEDA CRM</Text>
+                    <Text style={PDFStyles.headerSubtitle}>Premium Credit Partner Onboarding</Text>
                 </View>
                 <View style={PDFStyles.badge}>
                     <Text style={PDFStyles.badgeText}>CREDIT PARTNER ACCESS</Text>
                 </View>
             </View>
 
+            {/* Accent Divider */}
+            <View style={PDFStyles.divider} />
+
             {/* Title */}
             <View style={PDFStyles.titleSection}>
-                <Text style={PDFStyles.mainTitle}>Access Credentials Issued</Text>
-                <Text style={PDFStyles.subTitle}>Official login details for the Veda Loans Credit Partner Portal.</Text>
+                <Text style={PDFStyles.mainTitle}>Credit Partner Access Credentials</Text>
+                <Text style={PDFStyles.subTitle}>Official onboarding credentials for the Veda Loans Credit Partner Portal</Text>
+                <Text style={PDFStyles.docId}>Document ID: {creds.partner_id} | Issued: {new Date(creds.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</Text>
             </View>
 
-            {/* Partner Details */}
+            {/* Partner Information */}
             <View style={PDFStyles.section}>
-                <Text style={PDFStyles.sectionLabel}>Partner Information</Text>
+                <View style={PDFStyles.sectionHeader}>
+                    <Text style={PDFStyles.sectionLabel}>01. Partner Information</Text>
+                </View>
                 <View style={PDFStyles.grid}>
-                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Company Name</Text><Text style={PDFStyles.fieldValue}>{creds.company_name}</Text></View>
-                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Partner ID</Text><Text style={PDFStyles.fieldValue}>{creds.partner_id}</Text></View>
-                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Contact Person</Text><Text style={PDFStyles.fieldValue}>{creds.role === 'Relationship Manager' ? creds.full_name : (creds.full_name || creds.company_name)}</Text></View>
-                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>System Role</Text><Text style={PDFStyles.fieldValue}>Credit Partner</Text></View>
+                    <View style={PDFStyles.fieldBox}>
+                        <Text style={PDFStyles.fieldLabel}>Company / Business Name</Text>
+                        <Text style={PDFStyles.fieldValueLarge}>{creds.company_name}</Text>
+                    </View>
+                    <View style={PDFStyles.fieldBox}>
+                        <Text style={PDFStyles.fieldLabel}>Partner ID</Text>
+                        <Text style={PDFStyles.fieldValueLarge}>{creds.partner_id}</Text>
+                    </View>
+                    <View style={PDFStyles.fieldBox}>
+                        <Text style={PDFStyles.fieldLabel}>Partner Type</Text>
+                        <Text style={PDFStyles.fieldValue}>{creds.partner_type || 'Credit Partner'}</Text>
+                    </View>
+                    <View style={PDFStyles.fieldBox}>
+                        <Text style={PDFStyles.fieldLabel}>Branch / Location</Text>
+                        <Text style={PDFStyles.fieldValue}>{creds.branch_name || 'Headquarters'}</Text>
+                    </View>
+                    <View style={PDFStyles.fieldBox}>
+                        <Text style={PDFStyles.fieldLabel}>Contact Person</Text>
+                        <Text style={PDFStyles.fieldValue}>{creds.full_name || creds.company_name}</Text>
+                    </View>
+                    <View style={PDFStyles.fieldBox}>
+                        <Text style={PDFStyles.fieldLabel}>System Role</Text>
+                        <Text style={PDFStyles.fieldValue}>{creds.role || 'Credit Partner'}</Text>
+                    </View>
                 </View>
             </View>
 
-            {/* Credential Card */}
+            {/* Login Credentials */}
             <View style={PDFStyles.section}>
-                <Text style={PDFStyles.sectionLabel}>Login Credentials</Text>
+                <View style={PDFStyles.sectionHeader}>
+                    <Text style={PDFStyles.sectionLabel}>02. Portal Login Credentials</Text>
+                </View>
                 <View style={PDFStyles.credentialCard}>
                     <View style={PDFStyles.credentialRow}>
-                        <Text style={PDFStyles.fieldLabel}>Portal Username (Email)</Text>
-                        <Text style={PDFStyles.fieldValue}>{creds.email}</Text>
+                        <View>
+                            <Text style={PDFStyles.fieldLabel}>Portal Username (Corporate Email)</Text>
+                            <Text style={PDFStyles.fieldValueLarge}>{creds.email}</Text>
+                        </View>
                     </View>
+                    
+                    <View style={PDFStyles.credentialDivider} />
+                    
                     <View style={PDFStyles.passwordBox}>
-                        <Text style={PDFStyles.fieldLabel}>Secure One-Time Password</Text>
+                        <Text style={PDFStyles.passwordLabel}>Initial Generated Password (One-Time)</Text>
                         <Text style={PDFStyles.passwordText}>{creds.password}</Text>
                     </View>
 
                     <View style={PDFStyles.noteBox}>
-                        <Text style={PDFStyles.noteText}>IMPORTANT SECURITY NOTICE: This is a one-time generated password. For security reasons, you are REQUIRED to change your password immediately upon your first login to the portal. Do not share these credentials with unauthorized personnel.</Text>
+                        <Text style={PDFStyles.noteText}>
+                            <Text style={{ fontWeight: 700 }}>SECURITY NOTICE:</Text> This is a system-generated one-time password. The partner MUST change their password immediately upon first login to the portal. Do not share these credentials with unauthorized personnel.
+                        </Text>
                     </View>
                 </View>
             </View>
 
-            {/* Access Point */}
+            {/* Portal Access Information */}
             <View style={PDFStyles.section}>
-                <Text style={PDFStyles.sectionLabel}>Portal Support Information</Text>
-                <View style={PDFStyles.grid}>
-                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Portal URL</Text><Text style={PDFStyles.fieldValue}>veda-partner-portal.onrender.com</Text></View>
-                    <View style={PDFStyles.fieldBox}><Text style={PDFStyles.fieldLabel}>Support Email</Text><Text style={PDFStyles.fieldValue}>support@vedaloans.in</Text></View>
+                <View style={PDFStyles.sectionHeader}>
+                    <Text style={PDFStyles.sectionLabel}>03. Portal Access Information</Text>
+                </View>
+                <View style={PDFStyles.accessCard}>
+                    <View style={PDFStyles.accessRow}>
+                        <Text style={PDFStyles.accessLabel}>Portal URL</Text>
+                        <Text style={PDFStyles.accessValue}>veda-partner-portal.onrender.com</Text>
+                    </View>
+                    <View style={PDFStyles.accessRow}>
+                        <Text style={PDFStyles.accessLabel}>API Base URL</Text>
+                        <Text style={PDFStyles.accessValue}>api.vedaloans.in/v1</Text>
+                    </View>
+                    <View style={PDFStyles.accessRow}>
+                        <Text style={PDFStyles.accessLabel}>Access Level</Text>
+                        <Text style={PDFStyles.accessValue}>Credit Partner - External</Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* Support Information */}
+            <View style={PDFStyles.supportCard}>
+                <Text style={PDFStyles.supportTitle}>Dedicated Support Contact</Text>
+                <View style={PDFStyles.supportRow}>
+                    <Text style={PDFStyles.supportLabel}>Support Email</Text>
+                    <Text style={PDFStyles.supportValue}>support@vedaloans.in</Text>
+                </View>
+                <View style={PDFStyles.supportRow}>
+                    <Text style={PDFStyles.supportLabel}>Partner Helpline</Text>
+                    <Text style={PDFStyles.supportValue}>+91 11 4567 8900</Text>
+                </View>
+                <View style={PDFStyles.supportRow}>
+                    <Text style={PDFStyles.supportLabel}>Relationship Manager</Text>
+                    <Text style={PDFStyles.supportValue}>{createdBy || 'Veda CRM Team'}</Text>
+                </View>
+            </View>
+
+            {/* Next Steps */}
+            <View style={PDFStyles.nextSteps}>
+                <Text style={PDFStyles.nextStepsTitle}>Important Next Steps</Text>
+                <View style={PDFStyles.stepRow}>
+                    <Text style={PDFStyles.stepNumber}>1</Text>
+                    <Text style={PDFStyles.stepText}>Share these credentials securely with the credit partner via encrypted email or secure messaging.</Text>
+                </View>
+                <View style={PDFStyles.stepRow}>
+                    <Text style={PDFStyles.stepNumber}>2</Text>
+                    <Text style={PDFStyles.stepText}>Partner must change their password immediately upon first portal login.</Text>
+                </View>
+                <View style={PDFStyles.stepRow}>
+                    <Text style={PDFStyles.stepNumber}>3</Text>
+                    <Text style={PDFStyles.stepText}>Complete KYC/verification documents via the partner portal if not already done.</Text>
                 </View>
             </View>
 
             {/* Footer */}
             <View style={PDFStyles.footer}>
-                <Text style={PDFStyles.footerText}>Issued: {new Date(creds.created_at).toLocaleString()}</Text>
-                <Text style={PDFStyles.footerText}>Confidential - Internal Access Only</Text>
+                <View style={PDFStyles.footerLeft}>
+                    <Text style={PDFStyles.footerText}>Created by: {createdBy || 'Veda CRM Admin'}</Text>
+                    <Text style={PDFStyles.footerText}>{new Date(creds.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</Text>
+                </View>
+                <View style={PDFStyles.footerRight}>
+                    <Text style={PDFStyles.footerConfidential}>⚠ CONFIDENTIAL - INTERNAL USE ONLY</Text>
+                    <Text style={PDFStyles.footerText}>Veda Loans CRM | www.vedaloans.in</Text>
+                </View>
             </View>
         </Page>
     </Document>
@@ -224,6 +420,16 @@ const partnerRoles = [
     'DSA Agent'
 ];
 
+const partnerTypes = [
+    { value: 'Bank', label: '🏦 Bank' },
+    { value: 'NBFC', label: '🏛️ NBFC (Non-Banking Finance Company)' },
+    { value: 'HFC', label: '🏠 HFC (Housing Finance Company)' },
+    { value: 'Fintech', label: '💳 Fintech Partner' },
+    { value: 'Credit Partner', label: '🤝 Credit Partner' },
+    { value: 'DSA', label: '📋 DSA (Direct Selling Agent)' },
+    { value: 'Others', label: '📦 Others' }
+];
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const CreditPartners = () => {
     const theme = useTheme();
@@ -239,9 +445,18 @@ const CreditPartners = () => {
     const [openModal, setOpenModal] = useState(false);
     const [modalMode, setModalMode] = useState('add');
     const [saving, setSaving] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
-        name: '', bank_id: '', branch_name: '', email: '', phone: '', password: '', status: 'Active', partner_role: 'Relationship Manager'
+        name: '', 
+        bank_id: '', 
+        branch_name: '', 
+        email: '', 
+        phone: '', 
+        password: '', 
+        status: 'Active', 
+        partner_role: 'Relationship Manager',
+        partner_type: 'Credit Partner',
+        designation: '',
+        department: ''
     });
     const [banks, setBanks] = useState([]);
     const [formError, setFormError] = useState(null);
@@ -343,10 +558,27 @@ const CreditPartners = () => {
         setFormError(null);
         setShowPassword(false);
         if (partner) {
-            setFormData({ ...partner, password: '' });
+            setFormData({ 
+                ...partner, 
+                password: '',
+                partner_type: partner.partner_type || 'Credit Partner',
+                designation: partner.designation || '',
+                department: partner.department || ''
+            });
         } else {
-            // Password will be auto-generated by backend now
-            setFormData({ name: '', bank_id: '', branch_name: '', email: '', phone: '', password: '', status: 'Active', partner_role: 'Relationship Manager' });
+            setFormData({ 
+                name: '', 
+                bank_id: '', 
+                branch_name: '', 
+                email: '', 
+                phone: '', 
+                password: '', 
+                status: 'Active', 
+                partner_role: 'Relationship Manager',
+                partner_type: 'Credit Partner',
+                designation: '',
+                department: ''
+            });
         }
         setOpenModal(true);
     };
@@ -810,11 +1042,11 @@ const CreditPartners = () => {
                             {/* Identity Section */}
                             <Grid size={{ xs: 12, md: 6 }}>
                                 <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
-                                    Partner Identity
+                                    Business Details
                                 </Typography>
                                 <Stack spacing={2.5}>
                                     <TextField
-                                        label="Full Name / Company Name"
+                                        label="Company / Business Name"
                                         fullWidth
                                         required
                                         value={formData.name}
@@ -824,23 +1056,32 @@ const CreditPartners = () => {
                                     />
                                     <TextField
                                         select
-                                        label="System Role / Designation"
+                                        label="Partner Type"
                                         fullWidth
-                                        value={formData.partner_role}
-                                        onChange={(e) => setFormData(p => ({ ...p, partner_role: e.target.value }))}
+                                        required
+                                        value={formData.partner_type}
+                                        onChange={(e) => setFormData(p => ({ ...p, partner_type: e.target.value }))}
                                         InputProps={{ sx: { borderRadius: 3 } }}
                                     >
-                                        {partnerRoles.map(role => (
-                                            <MenuItem key={role} value={role}>{role}</MenuItem>
+                                        {partnerTypes.map(type => (
+                                            <MenuItem key={type.value} value={type.value}>{type.label}</MenuItem>
                                         ))}
                                     </TextField>
+                                    <TextField
+                                        label="Designation / Role"
+                                        fullWidth
+                                        placeholder="e.g. Senior Manager, Credit Head"
+                                        value={formData.designation}
+                                        onChange={(e) => setFormData(p => ({ ...p, designation: e.target.value }))}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    />
                                 </Stack>
                             </Grid>
 
                             {/* Mapping Section */}
                             <Grid size={{ xs: 12, md: 6 }}>
                                 <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
-                                    Bank Mapping
+                                    Organization Mapping
                                 </Typography>
                                 <Stack spacing={2.5}>
                                     <TextField
@@ -857,7 +1098,15 @@ const CreditPartners = () => {
                                         ))}
                                     </TextField>
                                     <TextField
-                                        label="Specific Branch Name"
+                                        label="Branch / Department"
+                                        fullWidth
+                                        placeholder="e.g. Gurugram Hub, SME Division"
+                                        value={formData.department}
+                                        onChange={(e) => setFormData(p => ({ ...p, department: e.target.value }))}
+                                        InputProps={{ sx: { borderRadius: 3 } }}
+                                    />
+                                    <TextField
+                                        label="Specific Branch Location"
                                         fullWidth
                                         placeholder="e.g. Gurugram Hub"
                                         value={formData.branch_name}
@@ -871,9 +1120,37 @@ const CreditPartners = () => {
                             <Grid size={{ xs: 12 }}>
                                 <Divider sx={{ my: 1 }} />
                                 <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', mb: 2, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1, mt: 1 }}>
-                                    Electronic Communications
+                                    Contact Person & System Role
                                 </Typography>
                                 <Grid container spacing={3}>
+                                    <Grid size={{ xs: 12, md: 6 }}>
+                                        <TextField
+                                            label="Contact Person Full Name"
+                                            fullWidth
+                                            required
+                                            value={formData.name}
+                                            onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))}
+                                            placeholder="e.g. Rajesh Kumar"
+                                            InputProps={{ 
+                                                sx: { borderRadius: 3 },
+                                                startAdornment: <InputAdornment position="start"><UserCircle size={18} /></InputAdornment>
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, md: 6 }}>
+                                        <TextField
+                                            select
+                                            label="System Role / Access Level"
+                                            fullWidth
+                                            value={formData.partner_role}
+                                            onChange={(e) => setFormData(p => ({ ...p, partner_role: e.target.value }))}
+                                            InputProps={{ sx: { borderRadius: 3 } }}
+                                        >
+                                            {partnerRoles.map(role => (
+                                                <MenuItem key={role} value={role}>{role}</MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
                                     <Grid size={{ xs: 12, md: 6 }}>
                                         <TextField
                                             label="Official Email Address"
@@ -1069,7 +1346,7 @@ const CreditPartners = () => {
 
             {/* ── Snackbar ──────────────────────────────────────────────── */}
             {/* ═══════════════════════════════════════════════════════════ */}
-            {/* Success / Credentials Modal                                */}
+            {/* Success / Credentials Modal (Invoice Style)                */}
             {/* ═══════════════════════════════════════════════════════════ */}
             <Dialog
                 open={openSuccessModal}
@@ -1077,148 +1354,356 @@ const CreditPartners = () => {
                 maxWidth="md"
                 fullWidth
                 PaperProps={{
-                    sx: { borderRadius: 5, overflow: 'hidden' }
+                    sx: { borderRadius: 4, overflow: 'hidden' }
                 }}
             >
-                <DialogTitle sx={{ p: 4, pb: 2, textAlign: 'center', bgcolor: alpha('#10b981', 0.03) }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ p: 1.5, bgcolor: '#10b981', borderRadius: '50%', color: '#fff', display: 'flex' }}>
-                            <CheckCircle2 size={32} strokeWidth={3} />
+                {/* Header with accent bar */}
+                <Box sx={{ 
+                    bgcolor: '#0f172a', 
+                    color: '#fff', 
+                    p: 4,
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Background pattern */}
+                    <Box sx={{
+                        position: 'absolute',
+                        top: 0, right: 0,
+                        width: 200, height: 200,
+                        background: 'radial-gradient(circle at top right, rgba(37, 99, 235, 0.3) 0%, transparent 70%)',
+                    }} />
+                    
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', zIndex: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ 
+                                p: 1.5, 
+                                bgcolor: '#10b981', 
+                                borderRadius: 2, 
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <CheckCircle2 size={28} strokeWidth={2.5} />
+                            </Box>
+                            <Box>
+                                <Typography variant="h5" sx={{ fontWeight: 900, letterSpacing: -0.5 }}>
+                                    Credit Partner Onboarded
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: '#94a3b8', mt: 0.5 }}>
+                                    Credentials have been issued and are ready for secure sharing
+                                </Typography>
+                            </Box>
                         </Box>
-                        <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.primary' }}>
-                            Credit Partner Credentials Issued Successfully
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Access credentials have been generated and the welcome email is being dispatched.
+                        <Chip 
+                            label={`ID: ${generatedCredentials?.partner_id || 'N/A'}`}
+                            sx={{ 
+                                bgcolor: 'rgba(255,255,255,0.1)', 
+                                color: '#fff',
+                                fontWeight: 700,
+                                fontSize: '0.85rem',
+                                height: 32
+                            }}
+                        />
+                    </Box>
+                </Box>
+
+                <DialogContent sx={{ p: 0 }}>
+                    {/* Document Header */}
+                    <Box sx={{ 
+                        px: 4, pt: 4, pb: 2,
+                        borderBottom: '2px solid #2563eb',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 900, color: '#0f172a' }}>
+                                VEDA CRM
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: '#64748b', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                Credit Partner Access Credentials
+                            </Typography>
+                        </Box>
+                        <Typography variant="caption" sx={{ color: '#94a3b8' }}>
+                            {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </Typography>
                     </Box>
-                </DialogTitle>
 
-                <DialogContent sx={{ p: 4 }}>
-                    <Grid container spacing={3}>
-                        {/* Partner Identity Card */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Box sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: 4, height: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                                    <Avatar sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1), color: 'primary.main', fontWeight: 800 }}>
-                                        <Building2 size={20} />
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'primary.main', textTransform: 'uppercase' }}>
-                                            Partner Identity
-                                        </Typography>
-                                        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                                            {generatedCredentials?.company_name}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Stack spacing={2}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography variant="body2" color="text.secondary">Partner ID</Typography>
-                                        <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary' }}>
-                                            {generatedCredentials?.partner_id}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography variant="body2" color="text.secondary">System Role</Typography>
-                                        <Chip label="Credit Partner" size="small" sx={{ fontWeight: 800, bgcolor: 'primary.main', color: '#fff' }} />
-                                    </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <Typography variant="body2" color="text.secondary">Contact Group</Typography>
-                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{generatedCredentials?.role}</Typography>
-                                    </Box>
-                                </Stack>
-                            </Box>
-                        </Grid>
-
-                        {/* Login Credentials Card */}
-                        <Grid size={{ xs: 12, md: 6 }}>
-                            <Box sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: 4, height: '100%', bgcolor: alpha(theme.palette.success.main, 0.02) }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                                    <Avatar sx={{ bgcolor: alpha(theme.palette.success.main, 0.1), color: 'success.main', fontWeight: 800 }}>
-                                        <Lock size={20} />
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'success.main', textTransform: 'uppercase' }}>
-                                            Login Credentials
-                                        </Typography>
-                                        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
-                                            Secure Access Details
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Stack spacing={2.5}>
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.5 }}>Login Email</Typography>
-                                        <Typography variant="body1" sx={{ fontWeight: 800, fontStyle: 'italic', color: 'primary.main' }}>
-                                            {generatedCredentials?.email}
-                                        </Typography>
-                                    </Box>
-
-                                    <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#ffffff', border: '1px dashed', borderColor: 'divider', position: 'relative' }}>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, display: 'block', mb: 0.5 }}>Temporary Password</Typography>
-                                        <Typography variant="h5" sx={{ fontWeight: 900, color: 'error.main', letterSpacing: 2 }}>
-                                            {generatedCredentials?.password}
-                                        </Typography>
-                                        <IconButton
-                                            size="small"
-                                            sx={{ position: 'absolute', top: 12, right: 12 }}
-                                            onClick={() => copyToClipboard(generatedCredentials?.password, 'Password copied!')}
+                    {/* Partner Details */}
+                    <Box sx={{ px: 4, py: 3 }}>
+                        <Grid container spacing={4}>
+                            {/* Left Column - Partner Info */}
+                            <Grid size={{ xs: 12, md: 5 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{ 
+                                        p: 3, 
+                                        bgcolor: '#f8fafc', 
+                                        borderRadius: 3, 
+                                        border: '1px solid #e2e8f0',
+                                        height: '100%'
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                                        <Avatar
+                                            sx={{ 
+                                                bgcolor: '#2563eb', 
+                                                color: '#fff',
+                                                fontWeight: 900,
+                                                fontSize: '1.2rem',
+                                                width: 48, height: 48
+                                            }}
                                         >
-                                            <Copy size={16} />
-                                        </IconButton>
+                                            {generatedCredentials?.company_name?.charAt(0) || 'P'}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="caption" sx={{ color: '#2563eb', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                                01. Partner Details
+                                            </Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+                                                {generatedCredentials?.company_name}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+
+                                    <Stack spacing={2}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, borderBottom: '1px dashed #e2e8f0' }}>
+                                            <Typography variant="body2" color="text.secondary">Partner ID</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 800, fontFamily: 'monospace' }}>
+                                                {generatedCredentials?.partner_id}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, borderBottom: '1px dashed #e2e8f0' }}>
+                                            <Typography variant="body2" color="text.secondary">Partner Type</Typography>
+                                            <Chip 
+                                                label={generatedCredentials?.partner_type || 'Credit Partner'} 
+                                                size="small" 
+                                                sx={{ 
+                                                    fontWeight: 700, 
+                                                    bgcolor: '#2563eb',
+                                                    color: '#fff',
+                                                    fontSize: '0.7rem'
+                                                }} 
+                                            />
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, borderBottom: '1px dashed #e2e8f0' }}>
+                                            <Typography variant="body2" color="text.secondary">Access Role</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                                {generatedCredentials?.role || 'Credit Partner'}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+                                            <Typography variant="body2" color="text.secondary">Branch</Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                                {generatedCredentials?.branch_name || 'Headquarters'}
+                                            </Typography>
+                                        </Box>
+                                    </Stack>
+                                </Paper>
+                            </Grid>
+
+                            {/* Right Column - Credentials */}
+                            <Grid size={{ xs: 12, md: 7 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{ 
+                                        p: 3, 
+                                        bgcolor: '#fff', 
+                                        borderRadius: 3, 
+                                        border: '2px solid #10b981',
+                                        borderLeftWidth: 5,
+                                        height: '100%'
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                                        <Avatar
+                                            sx={{ 
+                                                bgcolor: '#10b981', 
+                                                color: '#fff',
+                                                width: 40, height: 40
+                                            }}
+                                        >
+                                            <Lock size={20} />
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="caption" sx={{ color: '#10b981', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                                02. Login Credentials
+                                            </Typography>
+                                            <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0f172a' }}>
+                                                Secure Access Details
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+
+                                    <Stack spacing={2.5}>
+                                        <Box>
+                                            <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                                                PORTAL USERNAME (EMAIL)
+                                            </Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 800, color: '#2563eb' }}>
+                                                {generatedCredentials?.email}
+                                            </Typography>
+                                        </Box>
+
+                                        <Box sx={{ 
+                                            p: 2.5, 
+                                            bgcolor: '#fef2f2', 
+                                            borderRadius: 2, 
+                                            border: '2px dashed #dc2626',
+                                            position: 'relative'
+                                        }}>
+                                            <Typography variant="caption" sx={{ color: '#dc2626', fontWeight: 700, display: 'block', mb: 1 }}>
+                                                INITIAL PASSWORD (ONE-TIME - CHANGE ON LOGIN)
+                                            </Typography>
+                                            <Typography variant="h4" sx={{ 
+                                                fontWeight: 900, 
+                                                color: '#dc2626', 
+                                                letterSpacing: 3,
+                                                fontFamily: 'monospace'
+                                            }}>
+                                                {generatedCredentials?.password}
+                                            </Typography>
+                                            <IconButton
+                                                size="small"
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 16, 
+                                                    right: 16,
+                                                    bgcolor: '#fff',
+                                                    '&:hover': { bgcolor: '#fee2e2' }
+                                                }}
+                                                onClick={() => copyToClipboard(generatedCredentials?.password, 'Password copied!')}
+                                            >
+                                                <Copy size={18} />
+                                            </IconButton>
+                                        </Box>
+                                    </Stack>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+
+                        {/* Portal Info & Support */}
+                        <Box sx={{ mt: 3, display: 'flex', gap: 3 }}>
+                            <Paper
+                                elevation={0}
+                                sx={{ 
+                                    flex: 1,
+                                    p: 2.5, 
+                                    bgcolor: '#eff6ff', 
+                                    borderRadius: 3, 
+                                    border: '1px solid #bfdbfe'
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                                    <Globe size={18} color="#2563eb" />
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1e40af' }}>
+                                        Portal Access
+                                    </Typography>
+                                </Box>
+                                <Stack spacing={1}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="caption" color="text.secondary">Portal URL</Typography>
+                                        <Typography variant="caption" sx={{ fontWeight: 700 }}>veda-partner-portal.onrender.com</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="caption" color="text.secondary">API Endpoint</Typography>
+                                        <Typography variant="caption" sx={{ fontWeight: 700 }}>api.vedaloans.in/v1</Typography>
                                     </Box>
                                 </Stack>
-                            </Box>
-                        </Grid>
-                    </Grid>
+                            </Paper>
 
-                    <Box sx={{ mt: 3, p: 2, bgcolor: alpha('#f59e0b', 0.08), borderRadius: 3, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-                        <Info size={20} color="#d97706" style={{ marginTop: 2, flexShrink: 0 }} />
-                        <Typography variant="body2" sx={{ color: '#92400e', lineHeight: 1.5 }}>
-                            <strong>Security Note:</strong> These credentials will only be displayed <strong>once</strong>. Please ensure you download the PDF summary or copy the temporary password before closing this window. The partner is required to change their password upon their first login.
-                        </Typography>
+                            <Paper
+                                elevation={0}
+                                sx={{ 
+                                    flex: 1,
+                                    p: 2.5, 
+                                    bgcolor: '#fefce8', 
+                                    borderRadius: 3, 
+                                    border: '1px solid #fef08a'
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                                    <Phone size={18} color="#a16207" />
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#a16207' }}>
+                                        Support Contact
+                                    </Typography>
+                                </Box>
+                                <Stack spacing={1}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="caption" color="text.secondary">Email</Typography>
+                                        <Typography variant="caption" sx={{ fontWeight: 700 }}>support@vedaloans.in</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="caption" color="text.secondary">Helpline</Typography>
+                                        <Typography variant="caption" sx={{ fontWeight: 700 }}>+91 11 4567 8900</Typography>
+                                    </Box>
+                                </Stack>
+                            </Paper>
+                        </Box>
+
+                        {/* Security Warning */}
+                        <Alert 
+                            severity="warning" 
+                            icon={<Info size={20} />}
+                            sx={{ 
+                                mt: 3, 
+                                borderRadius: 3,
+                                '& .MuiAlert-icon': { color: '#d97706' }
+                            }}
+                        >
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#92400e' }}>
+                                ⚠️ Security Notice: These credentials are displayed only once. 
+                                Please download the PDF or copy the credentials before closing. 
+                                Partner must change password on first login.
+                            </Typography>
+                        </Alert>
                     </Box>
                 </DialogContent>
 
-                <DialogActions sx={{ p: 4, pt: 1, justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-                    {generatedCredentials && (
-                        <PDFDownloadLink
-                            document={<CredentialsPDF creds={generatedCredentials} />}
-                            fileName={`VEDA_Partner_Onboarding_${generatedCredentials.partner_id}.pdf`}
-                            style={{ textDecoration: 'none' }}
+                <DialogActions sx={{ p: 3, pt: 2, justifyContent: 'space-between', bgcolor: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+                    <Box sx={{ display: 'flex', gap: 1.5 }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<Mail size={18} />}
+                            sx={{ 
+                                borderRadius: 2.5, 
+                                fontWeight: 700,
+                                borderColor: '#94a3b8',
+                                color: '#475569'
+                            }}
+                            onClick={() => showSnackbar('Sending welcome email via Resend...', 'info')}
                         >
-                            {({ loading }) => (
-                                <Button
-                                    variant="contained"
-                                    color="success"
-                                    startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <Download size={18} />}
-                                    sx={{ borderRadius: 3, px: 4, py: 1.5, fontWeight: 800, fontSize: '0.95rem', boxShadow: '0 8px 16px rgba(16, 185, 129, 0.25)' }}
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Preparing Document...' : 'Download Enrollment PDF'}
-                                </Button>
-                            )}
-                        </PDFDownloadLink>
-                    )}
-
-                    <Button
-                        variant="outlined"
-                        startIcon={<Mail size={18} />}
-                        sx={{ borderRadius: 3, px: 3, py: 1.5, fontWeight: 700 }}
-                        onClick={() => showSnackbar('Email Dispatching via Resend...', 'info')}
-                    >
-                        Resend Welcome Email
-                    </Button>
-
-                    <Button
-                        onClick={() => setOpenSuccessModal(false)}
-                        sx={{ fontWeight: 700, color: 'text.secondary', px: 3 }}
-                    >
-                        Close Window
-                    </Button>
+                            Send Welcome Email
+                        </Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1.5 }}>
+                        <Button
+                            onClick={() => setOpenSuccessModal(false)}
+                            sx={{ fontWeight: 700, color: 'text.secondary', px: 3 }}
+                        >
+                            Close
+                        </Button>
+                        {generatedCredentials && (
+                            <PDFDownloadLink
+                                document={<CredentialsPDF creds={generatedCredentials} createdBy={currentUser?.full_name || 'Veda Admin'} />}
+                                fileName={`VEDA_Partner_Credentials_${generatedCredentials.partner_id}.pdf`}
+                                style={{ textDecoration: 'none' }}
+                            >
+                                {({ loading }) => (
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <Download size={18} />}
+                                        sx={{ borderRadius: 2.5, px: 3, py: 1.2, fontWeight: 800 }}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Generating...' : 'Download PDF'}
+                                    </Button>
+                                )}
+                            </PDFDownloadLink>
+                        )}
+                    </Box>
                 </DialogActions>
             </Dialog>
 
